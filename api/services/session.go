@@ -15,6 +15,11 @@ type SessionService interface {
 	DeactivateSession(ctx context.Context, uid models.UID) error
 	KeepAliveSession(ctx context.Context, uid models.UID) error
 	SetSessionAuthenticated(ctx context.Context, uid models.UID, authenticated bool) error
+	SetSessionConnectionSource(ctx context.Context, uid models.UID, connectionSource string) error
+}
+
+func (s *service) SetSessionConnectionSource(ctx context.Context, uid models.UID, connectionSource string) error {
+	return s.store.SessionSetConnectionSource(ctx, uid, connectionSource)
 }
 
 func (s *service) ListSessions(ctx context.Context, pagination paginator.Query) ([]models.Session, int, error) {

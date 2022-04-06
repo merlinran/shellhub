@@ -10,6 +10,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestSessionSetConnectionSource(t *testing.T) {
+	data := initData()
+
+	db := dbtest.DBServer{}
+	defer db.Stop()
+
+	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
+
+	_, err := mongostore.NamespaceCreate(data.Context, &data.Namespace)
+	assert.NoError(t, err)
+
+	err = mongostore.DeviceCreate(data.Context, data.Device, "hostname")
+	assert.NoError(t, err)
+
+	s, err := mongostore.SessionCreate(data.Context, data.Session)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, s)
+
+	err = mongostore.SessionSetConnectionSource(data.Context, models.UID(data.Session.UID), "source")
+	assert.NoError(t, err)
+}
+
 func TestSessionCreate(t *testing.T) {
 	data := initData()
 

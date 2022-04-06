@@ -12,6 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func (s *Store) SessionSetConnectionSource(ctx context.Context, uid models.UID, source string) error {
+	_, err := s.db.Collection("sessions").UpdateOne(ctx, bson.M{"uid": uid}, bson.M{"$set": bson.M{"connection_source": source}})
+
+	return fromMongoError(err)
+}
+
 func (s *Store) SessionList(ctx context.Context, pagination paginator.Query) ([]models.Session, int, error) {
 	query := []bson.M{
 		{

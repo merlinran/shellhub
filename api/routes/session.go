@@ -11,19 +11,32 @@ import (
 )
 
 const (
-	GetSessionsURL             = "/sessions"
-	GetSessionURL              = "/sessions/:uid"
-	SetSessionAuthenticatedURL = "/sessions/:uid"
-	CreateSessionURL           = "/sessions"
-	FinishSessionURL           = "/sessions/:uid/finish"
-	KeepAliveSessionURL        = "/sessions/:uid/keepalive"
-	RecordSessionURL           = "/sessions/:uid/record"
-	PlaySessionURL             = "/sessions/:uid/play"
+	GetSessionsURL                = "/sessions"
+	GetSessionURL                 = "/sessions/:uid"
+	SetSessionAuthenticatedURL    = "/sessions/:uid"
+	SetSessionConnectionSourceURL = "/sessions/:uid/connection_source"
+	CreateSessionURL              = "/sessions"
+	FinishSessionURL              = "/sessions/:uid/finish"
+	KeepAliveSessionURL           = "/sessions/:uid/keepalive"
+	RecordSessionURL              = "/sessions/:uid/record"
+	PlaySessionURL                = "/sessions/:uid/play"
 )
 
 const (
 	ParamSessionID = "uid"
 )
+
+func (h *Handler) SetSessionConnectionSource(c gateway.Context) error {
+	var req struct {
+		ConnectionSource string `json:"connection_source"`
+	}
+
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+
+	return h.service.SetSessionConnectionSource(c.Ctx(), models.UID(c.Param(ParamSessionID)), req.ConnectionSource)
+}
 
 func (h *Handler) GetSessionList(c gateway.Context) error {
 	query := paginator.NewQuery()

@@ -12,6 +12,7 @@ type SessionStore interface {
 	SessionGet(ctx context.Context, uid models.UID) (*models.Session, error)
 	SessionCreate(ctx context.Context, session models.Session) (*models.Session, error)
 	SessionSetAuthenticated(ctx context.Context, uid models.UID, authenticated bool) error
+	SessionSetConnectionSource(ctx context.Context, uid models.UID, connectionSource string) error
 	SessionSetLastSeen(ctx context.Context, uid models.UID) error
 	SessionDeleteActives(ctx context.Context, uid models.UID) error
 	SessionCreateRecordFrame(ctx context.Context, uid models.UID, recordSession *models.RecordedSession) error
