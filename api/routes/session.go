@@ -78,27 +78,6 @@ func (h *Handler) SetSessionAuthenticated(c gateway.Context) error {
 	return h.service.SetSessionAuthenticated(c.Ctx(), models.UID(c.Param(ParamSessionID)), req.Authenticated)
 }
 
-func (h *Handler) CreateSession(c gateway.Context) error {
-	session := new(models.Session)
-
-	if err := c.Bind(&session); err != nil {
-		return err
-	}
-
-	session, err := h.service.CreateSession(c.Ctx(), *session)
-	if err != nil {
-		return err
-	}
-
-	ip := c.Request().Header.Get("X-Real-IP")
-	err = h.service.SetDevicePosition(c.Ctx(), session.DeviceUID, ip)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, session)
-}
-
 func (h *Handler) FinishSession(c gateway.Context) error {
 	err := h.service.DeactivateSession(c.Ctx(), models.UID(c.Param(ParamSessionID)))
 	if err == services.ErrNotFound {

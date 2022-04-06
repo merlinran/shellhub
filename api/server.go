@@ -171,7 +171,6 @@ func startServer() error {
 	publicAPI.GET(routes.GetSessionURL,
 		apiMiddleware.Authorize(gateway.Handler(handler.GetSession)))
 	internalAPI.PATCH(routes.SetSessionAuthenticatedURL, gateway.Handler(handler.SetSessionAuthenticated))
-	internalAPI.POST(routes.CreateSessionURL, gateway.Handler(handler.CreateSession))
 	internalAPI.POST(routes.FinishSessionURL, gateway.Handler(handler.FinishSession))
 	internalAPI.POST(routes.KeepAliveSessionURL, gateway.Handler(handler.KeepAliveSession))
 	internalAPI.POST(routes.RecordSessionURL, gateway.Handler(handler.RecordSession))
