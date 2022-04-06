@@ -80,6 +80,68 @@ func TestListSessions(t *testing.T) {
 	mock.AssertExpectations(t)
 }
 
+func TestSetSessionConnectionSource(t *testing.T) {
+	mock := &mocks.Store{}
+	s := NewService(store.Store(mock), privateKey, publicKey, storecache.NewNullCache(), clientMock, nil)
+
+	ctx := context.TODO()
+
+	type Expected struct {
+		session *models.Session
+		err     error
+	}
+
+	session := &models.Session{UID: "uid"}
+
+	Err := errors.New("error")
+
+	cases := []struct {
+		name          string
+		ctx           context.Context
+		uid           models.UID
+		source        string
+		requiredMocks func()
+		expected      Expected
+	}{
+		{
+			name:   "SetSessionConnectionSource fails",
+			uid:    models.UID("_uid"),
+			source: "source",
+			requiredMocks: func() {
+				mock.On("SessionSetConnectionSource", ctx, models.UID("_uid"), "source").
+					Return(nil, Err).Once()
+			},
+			expected: Expected{
+				session: nil,
+				err:     Err,
+			},
+		},
+		{
+			name:   "SetSessionConnectionSource succeeds",
+			uid:    models.UID("uid"),
+			source: "source",
+			requiredMocks: func() {
+				mock.On("SessionSetConnectionSource", ctx, models.UID("uid"), "source").
+					Return(session, nil).Once()
+			},
+			expected: Expected{
+				session: session,
+				err:     nil,
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.requiredMocks()
+			returnedSession, err := s.SetSessionConnectionSource(tc.ctx, tc.uid, tc.source)
+			assert.Equal(t, tc.expected, Expected{returnedSession, err})
+		})
+	}
+
+	mock.AssertExpectations(t)
+}
+
 func TestGetSession(t *testing.T) {
 	mock := &mocks.Store{}
 	s := NewService(store.Store(mock), privateKey, publicKey, storecache.NewNullCache(), clientMock, nil)
