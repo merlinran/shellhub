@@ -34,6 +34,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/shellhub-io/shellhub/pkg/clock"
 	"github.com/shellhub-io/shellhub/pkg/wsconnadapter"
+	ws "nhooyr.io/websocket"
 )
 
 var ErrDialerClosed = errors.New("revdial.Dialer closed")
@@ -243,7 +244,7 @@ func (d *Dialer) sendMessage(m controlMsg) error {
 //
 // The provided dialServer func is responsible for connecting back to
 // the server and doing TLS setup.
-func NewListener(serverConn net.Conn, dialServer func(context.Context, string) (*websocket.Conn, *http.Response, error)) *Listener {
+func NewListener(serverConn net.Conn, dialServer func(context.Context, string) (*ws.Conn, *http.Response, error)) *Listener {
 	ln := &Listener{
 		sc:    serverConn,
 		dial:  dialServer,
@@ -263,7 +264,7 @@ type Listener struct {
 	sc     net.Conn
 	connc  chan net.Conn
 	donec  chan struct{}
-	dial   func(context.Context, string) (*websocket.Conn, *http.Response, error)
+	dial   func(context.Context, string) (*ws.Conn, *http.Response, error)
 	writec chan<- []byte
 
 	mu      sync.Mutex // guards below, closing connc, and writing to rw
@@ -360,7 +361,7 @@ func (ln *Listener) grabConn(path string) {
 	}
 
 	failPickup := func(err error) {
-		wsConn.Close()
+		//		wsConn.Close()
 		log.Printf("revdial.Listener: failed to pick up connection to %s: %v", path, err)
 		ln.sendMessage(controlMsg{Command: "pickup-failed", ConnPath: path, Err: err.Error()})
 	}
@@ -447,7 +448,7 @@ func ConnHandler(upgrader websocket.Upgrader) http.Handler {
 			return
 		}
 
-		wsConn, err := upgrader.Upgrade(w, r, nil)
+		wsConn, err := ws.Accept(w, r, nil)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 

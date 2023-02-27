@@ -1,13 +1,14 @@
 package wsconnadapter
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
+	ws "nhooyr.io/websocket"
 )
 
 // an adapter for representing WebSocket connection as a net.Conn
@@ -16,13 +17,13 @@ import (
 var ErrUnexpectedMessageType = errors.New("unexpected websocket message type")
 
 type Adapter struct {
-	conn       *websocket.Conn
+	conn       *ws.Conn
 	readMutex  sync.Mutex
 	writeMutex sync.Mutex
 	reader     io.Reader
 }
 
-func New(conn *websocket.Conn) *Adapter {
+func New(conn *ws.Conn) *Adapter {
 	return &Adapter{
 		conn: conn,
 	}
@@ -34,15 +35,7 @@ func (a *Adapter) Read(b []byte) (int, error) {
 	defer a.readMutex.Unlock()
 
 	if a.reader == nil {
-		messageType, reader, err := a.conn.NextReader()
-		if err != nil {
-			return 0, err
-		}
-
-		if messageType != websocket.BinaryMessage {
-			return 0, ErrUnexpectedMessageType
-		}
-
+		_, reader, _ := a.conn.Reader(context.TODO())
 		a.reader = reader
 	}
 
@@ -65,27 +58,30 @@ func (a *Adapter) Write(b []byte) (int, error) {
 	a.writeMutex.Lock()
 	defer a.writeMutex.Unlock()
 
-	nextWriter, err := a.conn.NextWriter(websocket.BinaryMessage)
-	if err != nil {
-		return 0, err
-	}
+	writer, _ := a.conn.Writer(context.TODO(), ws.MessageBinary)
 
-	bytesWritten, err := nextWriter.Write(b)
-	nextWriter.Close()
+	bytesWritten, err := writer.Write(b)
+	writer.Close()
 
 	return bytesWritten, err
 }
 
 func (a *Adapter) Close() error {
-	return a.conn.Close()
+	//return a.conn.Close()
+	return nil
 }
 
+type fakeAddr struct{}
+
+func (fakeAddr) Network() string { return "revdial" }
+func (fakeAddr) String() string  { return "revdialconn" }
+
 func (a *Adapter) LocalAddr() net.Addr {
-	return a.conn.LocalAddr()
+	return &fakeAddr{}
 }
 
 func (a *Adapter) RemoteAddr() net.Addr {
-	return a.conn.RemoteAddr()
+	return &fakeAddr{}
 }
 
 func (a *Adapter) SetDeadline(t time.Time) error {
@@ -97,12 +93,12 @@ func (a *Adapter) SetDeadline(t time.Time) error {
 }
 
 func (a *Adapter) SetReadDeadline(t time.Time) error {
-	return a.conn.SetReadDeadline(t)
+	return nil
 }
 
 func (a *Adapter) SetWriteDeadline(t time.Time) error {
 	a.writeMutex.Lock()
 	defer a.writeMutex.Unlock()
 
-	return a.conn.SetWriteDeadline(t)
+	return nil
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/shellhub-io/shellhub/pkg/connman"
 	"github.com/shellhub-io/shellhub/pkg/revdial"
 	"github.com/shellhub-io/shellhub/pkg/wsconnadapter"
+	ws "nhooyr.io/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -70,7 +71,7 @@ func (t *Tunnel) Router() http.Handler {
 	router := mux.NewRouter()
 
 	router.HandleFunc(t.ConnectionPath, func(res http.ResponseWriter, req *http.Request) {
-		conn, err := upgrader.Upgrade(res, req, nil)
+		conn, err := ws.Accept(res, req, nil)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 
@@ -80,7 +81,7 @@ func (t *Tunnel) Router() http.Handler {
 		id, err := t.ConnectionHandler(req)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
-			defer conn.Close()
+			//			defer conn.Close()
 
 			return
 		}
