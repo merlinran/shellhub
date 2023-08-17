@@ -4,8 +4,13 @@ import (
 	req "github.com/shellhub-io/shellhub/pkg/api/internalclient"
 )
 
+type billingService interface {
+    billingEvaluate(req.Client, string)
+    billingReport(req.Client, string, string)
+}
+
 // billingEvaluate evaluate in the billing service if the namespace can create accept more devices.
-func billingEvaluate(client req.Client, tenant string) (bool, error) {
+func (s *service) billingEvaluate(client req.Client, tenant string) (bool, error) {
 	evaluation, _, err := client.BillingEvaluate(tenant)
 	if err != nil {
 		return false, ErrEvaluate
@@ -19,7 +24,7 @@ const (
 	ReportNamespaceDelete = "namespace_delete"
 )
 
-func billingReport(client req.Client, tenant string, action string) error {
+func (s *service) billingReport(client req.Client, tenant string, action string) error {
 	status, err := client.BillingReport(tenant, action)
 	if err != nil {
 		return err

@@ -4,6 +4,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/shellhub-io/shellhub/api/store"
+	"github.com/shellhub-io/shellhub/api/store/mocks"
+	"github.com/shellhub-io/shellhub/pkg/cache"
 	"github.com/shellhub-io/shellhub/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,6 +19,8 @@ func mockBillingEvaluation(canAccept, canConnect bool) *models.BillingEvaluation
 }
 
 func TestBillingEvaluate(t *testing.T) {
+    mock := new(mocks.Store)
+
 	type Expected struct {
 		canAccept bool
 		err       error
@@ -49,15 +54,18 @@ func TestBillingEvaluate(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tc.requiredMocks()
 
-			canAccept, err := billingEvaluate(clientMock, tc.tenant)
+            s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
+			canAccept, err := s.billingEvaluate(clientMock, tc.tenant)
 			assert.Equal(t, tc.expected, Expected{canAccept: canAccept, err: err})
 		})
 	}
 
-	clientMock.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
 
 func TestBillingReport(t *testing.T) {
+    mock := new(mocks.Store)
+
 	cases := []struct {
 		description   string
 		tenant        string
@@ -107,10 +115,11 @@ func TestBillingReport(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tc.requiredMocks()
 
-			err := billingReport(clientMock, tc.tenant, tc.action)
+            s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
+			err := s.billingReport(clientMock, tc.tenant, tc.action)
 			assert.Equal(t, tc.expected, err)
 		})
 	}
 
-	clientMock.AssertExpectations(t)
+	mock.AssertExpectations(t)
 }
