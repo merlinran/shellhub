@@ -8,6 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func mockBillingEvaluation(canAccept, canConnect bool) *models.BillingEvaluation {
+    return &models.BillingEvaluation{
+        CanAccept: canAccept,
+        CanConnect: canConnect,
+    }
+}
+
 func TestBillingEvaluate(t *testing.T) {
     type Expected struct {
         canAccept bool
@@ -24,7 +31,7 @@ func TestBillingEvaluate(t *testing.T) {
             description: "succeeds when \"client.BillingEvaluate\" err is nil",
             tenant: "00000000-0000-0000-0000-000000000000",
             requiredMocks: func() {
-                clientMock.On("BillingEvaluate", "00000000-0000-0000-0000-000000000000").Return(&models.BillingEvaluation{CanAccept: true, CanConnect: true}, 0, nil).Once()
+                clientMock.On("BillingEvaluate", "00000000-0000-0000-0000-000000000000").Return(mockBillingEvaluation(true, true), 0, nil).Once()
             },
             expected: Expected{canAccept: true, err: nil},
         },
@@ -32,7 +39,7 @@ func TestBillingEvaluate(t *testing.T) {
             description: "succeeds when \"client.BillingEvaluate\" err is different than nil",
             tenant: "00000000-0000-0000-0000-000000000000",
             requiredMocks: func() {
-                clientMock.On("BillingEvaluate", "00000000-0000-0000-0000-000000000000").Return(&models.BillingEvaluation{CanAccept: false, CanConnect: false}, 0, ErrEvaluate).Once()
+                clientMock.On("BillingEvaluate", "00000000-0000-0000-0000-000000000000").Return(mockBillingEvaluation(false, false), 0, ErrEvaluate).Once()
             },
             expected: Expected{canAccept: false, err: ErrEvaluate},
         },
