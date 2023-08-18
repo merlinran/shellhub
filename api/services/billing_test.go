@@ -19,7 +19,7 @@ func mockBillingEvaluation(canAccept, canConnect bool) *models.BillingEvaluation
 }
 
 func TestBillingEvaluate(t *testing.T) {
-    mock := new(mocks.Store)
+	mock := new(mocks.Store)
 
 	type Expected struct {
 		canAccept bool
@@ -54,7 +54,7 @@ func TestBillingEvaluate(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tc.requiredMocks()
 
-            s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
+			s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
 			canAccept, err := s.billingEvaluate(clientMock, tc.tenant)
 			assert.Equal(t, tc.expected, Expected{canAccept: canAccept, err: err})
 		})
@@ -64,7 +64,7 @@ func TestBillingEvaluate(t *testing.T) {
 }
 
 func TestBillingReport(t *testing.T) {
-    mock := new(mocks.Store)
+	mock := new(mocks.Store)
 
 	cases := []struct {
 		description   string
@@ -115,7 +115,7 @@ func TestBillingReport(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tc.requiredMocks()
 
-            s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
+			s := NewService(store.Store(mock), privateKey, publicKey, cache.NewNullCache(), clientMock, nil)
 			err := s.billingReport(clientMock, tc.tenant, tc.action)
 			assert.Equal(t, tc.expected, err)
 		})
