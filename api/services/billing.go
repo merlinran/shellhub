@@ -5,8 +5,8 @@ import (
 )
 
 type billingService interface {
-    billingEvaluate(req.Client, string)
-    billingReport(req.Client, string, string)
+    billingEvaluate(req.Client, string) (bool, error)
+    billingReport(req.Client, string, string) (error)
 }
 
 // billingEvaluate evaluate in the billing service if the namespace can create accept more devices.
