@@ -11,7 +11,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/shellhub-io/shellhub/api/store/mongo"
 	"github.com/shellhub-io/shellhub/pkg/cache"
-	"github.com/shellhub-io/shellhub/pkg/models"
+	"github.com/shellhub-io/shellhub/pkg/clock"
 	log "github.com/sirupsen/logrus"
 	mongodriver "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -71,14 +71,19 @@ func StartHeartBeat(ctx context.Context) error {
 	mux := asynq.NewServeMux()
 
 	mux.HandleFunc("api:heartbeat", func(ctx context.Context, task *asynq.Task) error {
-		scanner := bufio.NewScanner(bytes.NewReader(task.Payload()))
-		scanner.Split(bufio.ScanLines)
+        scanner := bufio.NewScanner(bytes.NewReader(task.Payload()))
+        scanner.Split(bufio.ScanLines)
 
-		for scanner.Scan() {
-			store.DeviceSetOnline(ctx, models.UID(scanner.Text()), true) //nolint:errcheck
-		}
+        var lines []string
+        for scanner.Scan() {
+            lines = append(lines, scanner.Text())
+        }
 
-		return nil
+        if err := scanner.Err(); err != nil {
+            return err
+        }
+
+        return store.DeviceBulkSetOnline(ctx, lines, clock.Now())
 	})
 
 	if err := srv.Run(mux); err != nil {

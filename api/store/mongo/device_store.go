@@ -304,6 +304,62 @@ func (s *Store) DeviceLookup(ctx context.Context, namespace, hostname string) (*
 	return device, nil
 }
 
+func (s *Store) DeviceBulkSetOnline(ctx context.Context, devices []string, now time.Time) error {
+    // Updates "last_seen" atributte for all devices
+    var updateOperations []mongo.WriteModel
+    for uid := range devices {
+        operation := mongo.NewUpdateOneModel().
+        SetFilter(bson.M{"uid": uid}).
+        SetUpdate(bson.M{"$set": bson.M{"last_seen": now}}).
+        SetUpsert(true)
+
+        updateOperations = append(updateOperations, operation)
+    }
+
+    _, err := s.db.Collection("devices").BulkWrite(ctx, updateOperations)
+    if err != nil {
+        return FromMongoError(err)
+    }
+
+    // Find all updated devices
+    cursor, err := s.db.Collection("devices").Find(ctx, bson.M{"last_seen": now})
+    if err != nil {
+        return FromMongoError(err)
+    }
+    defer cursor.Close(ctx)
+
+    // Replace "connected_devices" collection with the online devices
+    var replaceOperations []mongo.WriteModel
+    for cursor.Next(ctx) {
+        device := new(models.Device)
+        if err := cursor.Decode(&device); err != nil {
+            return FromMongoError(err)
+        }
+
+        cd := &models.ConnectedDevice{
+            UID:      device.UID,
+            TenantID: device.TenantID,
+            LastSeen: device.LastSeen,
+            Status:   string(device.Status),
+        }
+
+        operation := mongo.NewReplaceOneModel().
+        SetFilter(bson.M{"uid": device.UID}).
+        SetReplacement(cd).
+        SetUpsert(true)
+
+        replaceOperations = append(replaceOperations, operation)
+    }
+
+    if err = cursor.Err(); err != nil {
+        return FromMongoError(err)
+    }
+
+    _, err = s.db.Collection("connected_devices").BulkWrite(ctx, replaceOperations)
+
+    return FromMongoError(err)
+}
+
 func (s *Store) DeviceSetOnline(ctx context.Context, uid models.UID, online bool) error {
 	if !online {
 		_, err := s.db.Collection("connected_devices").DeleteMany(ctx, bson.M{"uid": uid})

@@ -20,6 +20,7 @@ const (
 
 type DeviceStore interface {
 	DeviceList(ctx context.Context, pagination paginator.Query, filters []models.Filter, status models.DeviceStatus, sort string, order string, mode DeviceListMode) ([]models.Device, int, error)
+    DeviceBulkSetOnline(ctx context.Context, devices []string, now time.Time) error
 	DeviceGet(ctx context.Context, uid models.UID) (*models.Device, error)
 	DeviceUpdate(ctx context.Context, uid models.UID, name *string, publicURL *bool) error
 	DeviceDelete(ctx context.Context, uid models.UID) error
