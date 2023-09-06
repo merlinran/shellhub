@@ -305,18 +305,18 @@ func (s *Store) DeviceLookup(ctx context.Context, namespace, hostname string) (*
 }
 
 func (s *Store) DeviceBulkSetOnline(ctx context.Context, devices []string, now time.Time) error {
+    operations := make([]mongo.WriteModel, len(devices))
+
     // Updates "last_seen" atributte for all devices
-    var updateOperations []mongo.WriteModel
-    for uid := range devices {
+    for i, uid := range devices {
         operation := mongo.NewUpdateOneModel().
         SetFilter(bson.M{"uid": uid}).
-        SetUpdate(bson.M{"$set": bson.M{"last_seen": now}}).
-        SetUpsert(true)
+        SetUpdate(bson.M{"$set": bson.M{"last_seen": now}})
 
-        updateOperations = append(updateOperations, operation)
+        operations[i] = operation
     }
 
-    _, err := s.db.Collection("devices").BulkWrite(ctx, updateOperations)
+    _, err := s.db.Collection("devices").BulkWrite(ctx, operations)
     if err != nil {
         return FromMongoError(err)
     }
@@ -328,10 +328,12 @@ func (s *Store) DeviceBulkSetOnline(ctx context.Context, devices []string, now t
     }
     defer cursor.Close(ctx)
 
+    // reset operations
+    operations = operations[:0]
     // Replace "connected_devices" collection with the online devices
-    var replaceOperations []mongo.WriteModel
+    device := new(models.Device) 
+    index := 0
     for cursor.Next(ctx) {
-        device := new(models.Device)
         if err := cursor.Decode(&device); err != nil {
             return FromMongoError(err)
         }
@@ -348,14 +350,15 @@ func (s *Store) DeviceBulkSetOnline(ctx context.Context, devices []string, now t
         SetReplacement(cd).
         SetUpsert(true)
 
-        replaceOperations = append(replaceOperations, operation)
+        operations[index] = operation
+        index++
     }
 
     if err = cursor.Err(); err != nil {
         return FromMongoError(err)
     }
 
-    _, err = s.db.Collection("connected_devices").BulkWrite(ctx, replaceOperations)
+    _, err = s.db.Collection("connected_devices").BulkWrite(ctx, operations)
 
     return FromMongoError(err)
 }
