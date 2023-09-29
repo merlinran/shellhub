@@ -210,7 +210,6 @@ func (s *Sessioner) Exec(session gliderssh.Session) error {
 	}
 
 	cmd := command.NewCmd(user, shell, term, *s.deviceName, shell, "-c", strings.Join(session.Command(), " "))
-	defer session.Exit(cmd.ProcessState.ExitCode()) //nolint:errcheck
 
 	wg := &sync.WaitGroup{}
 	if sIsPty {
@@ -281,6 +280,8 @@ func (s *Sessioner) Exec(session gliderssh.Session) error {
 	if err := cmd.Wait(); err != nil {
 		log.Warn(err)
 	}
+
+	session.Exit(cmd.ProcessState.ExitCode()) //nolint:errcheck
 
 	log.WithFields(log.Fields{
 		"user":        session.User(),
