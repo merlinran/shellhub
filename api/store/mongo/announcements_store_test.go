@@ -16,14 +16,6 @@ import (
 )
 
 func TestAnnouncementList(t *testing.T) {
-	ctx := context.TODO()
-
-	db := dbtest.DBServer{}
-	defer db.Stop()
-
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
-
 	type Expected struct {
 		ann []models.AnnouncementShort
 		len int
@@ -32,11 +24,15 @@ func TestAnnouncementList(t *testing.T) {
 
 	cases := []struct {
 		description string
+		paginator   paginator.Query
+		order       order.Query
 		fixtures    []string
 		expected    Expected
 	}{
 		{
 			description: "succeeds when announcement list is empty",
+			paginator:   paginator.Query{Page: -1, PerPage: -1},
+			order:       order.Query{OrderBy: order.Asc},
 			fixtures:    []string{},
 			expected: Expected{
 				ann: nil,
@@ -46,27 +42,89 @@ func TestAnnouncementList(t *testing.T) {
 		},
 		{
 			description: "succeeds when announcement list is not empty",
+			paginator:   paginator.Query{Page: -1, PerPage: -1},
+			order:       order.Query{OrderBy: order.Asc},
 			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected: Expected{
 				ann: []models.AnnouncementShort{
 					{
 						Date:  time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
-						UUID:  "00000000-0000-4000-0000-000000000000",
-						Title: "title0",
+						UUID:  "00000000-0000-4001-0000-000000000000",
+						Title: "title-1",
+					},
+					{
+						Date:  time.Date(2023, 1, 2, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4002-0000-000000000000",
+						Title: "title-2",
+					},
+					{
+						Date:  time.Date(2023, 1, 3, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4003-0000-000000000000",
+						Title: "title-3",
 					},
 				},
-				len: 1,
+				len: 3,
+				err: nil,
+			},
+		},
+		{
+			description: "succeeds when announcement list is not empty and page and page size is limited",
+			paginator:   paginator.Query{Page: 2, PerPage: 1},
+			order:       order.Query{OrderBy: order.Asc},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
+			expected: Expected{
+				ann: []models.AnnouncementShort{
+					{
+						Date:  time.Date(2023, 1, 2, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4002-0000-000000000000",
+						Title: "title-2",
+					},
+				},
+				len: 3,
+				err: nil,
+			},
+		},
+		{
+			description: "succeeds when announcement list is not empty and order is desc",
+			paginator:   paginator.Query{Page: -1, PerPage: -1},
+			order:       order.Query{OrderBy: order.Desc},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
+			expected: Expected{
+				ann: []models.AnnouncementShort{
+					{
+						Date:  time.Date(2023, 1, 3, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4003-0000-000000000000",
+						Title: "title-3",
+					},
+					{
+						Date:  time.Date(2023, 1, 2, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4002-0000-000000000000",
+						Title: "title-2",
+					},
+					{
+						Date:  time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						UUID:  "00000000-0000-4001-0000-000000000000",
+						Title: "title-1",
+					},
+				},
+				len: 3,
 				err: nil,
 			},
 		},
 	}
+
+	db := dbtest.DBServer{}
+	defer db.Stop()
+
+	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
+	fixtures.Init(db.Host, "test")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
 
-			ann, count, err := mongostore.AnnouncementList(ctx, paginator.Query{Page: -1, PerPage: -1}, order.Query{OrderBy: order.Asc})
+			ann, count, err := mongostore.AnnouncementList(context.TODO(), tc.paginator, tc.order)
 			assert.Equal(t, tc.expected, Expected{ann: ann, len: count, err: err})
 		})
 	}
@@ -103,14 +161,14 @@ func TestAnnouncementGet(t *testing.T) {
 		},
 		{
 			description: "succeeds when announcement is found",
-			uuid:        "00000000-0000-4000-0000-000000000000",
+			uuid:        "00000000-0000-4001-0000-000000000000",
 			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected: Expected{
 				ann: &models.Announcement{
 					Date:    time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
-					UUID:    "00000000-0000-4000-0000-000000000000",
-					Title:   "title0",
-					Content: "content0",
+					UUID:    "00000000-0000-4001-0000-000000000000",
+					Title:   "title-1",
+					Content: "content-1",
 				},
 				err: nil,
 			},
@@ -194,7 +252,7 @@ func TestAnnouncementUpdate(t *testing.T) {
 		{
 			description: "succeeds when announcement is found",
 			ann: &models.Announcement{
-				UUID:    "00000000-0000-4000-0000-000000000000",
+				UUID:    "00000000-0000-4001-0000-000000000000",
 				Title:   "edited title",
 				Content: "edited content",
 			},
@@ -237,7 +295,7 @@ func TestAnnouncementDelete(t *testing.T) {
 		},
 		{
 			description: "succeeds when announcement is found",
-			uuid:        "00000000-0000-4000-0000-000000000000",
+			uuid:        "00000000-0000-4001-0000-000000000000",
 			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected:    nil,
 		},
