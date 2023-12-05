@@ -32,7 +32,14 @@ func TestGetStats(t *testing.T) {
 	}{
 		{
 			description: "succeeds",
-			fixtures:    []string{fixtures.User, fixtures.Namespace, fixtures.Session, fixtures.Device},
+			fixtures: []string{
+				fixtures.FixtureUsers,
+				fixtures.FixtureNamespaces,
+				fixtures.FixtureSessions,
+				fixtures.FixtureActiveSessions,
+				fixtures.FixtureDevices,
+				fixtures.FixtureConnectedDevices,
+			},
 			expected: Expected{
 				stats: &models.Stats{
 					RegisteredDevices: 1,

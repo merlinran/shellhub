@@ -39,7 +39,7 @@ func TestPublicKeyGet(t *testing.T) {
 			description: "succeeds when public key is not found due to fingerprint",
 			fingerprint: "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: nil,
 				err:    store.ErrNoDocuments,
@@ -49,7 +49,7 @@ func TestPublicKeyGet(t *testing.T) {
 			description: "succeeds when public key is not found due to tenant",
 			fingerprint: "fingerprint",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: nil,
 				err:    store.ErrNoDocuments,
@@ -59,7 +59,7 @@ func TestPublicKeyGet(t *testing.T) {
 			description: "succeeds when public key is found",
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: &models.PublicKey{
 					Data:        []byte("test"),
@@ -121,7 +121,7 @@ func TestPublicKeyList(t *testing.T) {
 		},
 		{
 			description: "succeeds when public key list len is greater than 1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: []models.PublicKey{
 					{
@@ -225,7 +225,7 @@ func TestPublicKeyUpdate(t *testing.T) {
 					Filter: models.PublicKeyFilter{Hostname: ".*"},
 				},
 			},
-			fixtures: []string{fixtures.PublicKey},
+			fixtures: []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: nil,
 				err:    store.ErrNoDocuments,
@@ -241,7 +241,7 @@ func TestPublicKeyUpdate(t *testing.T) {
 					Filter: models.PublicKeyFilter{Hostname: ".*"},
 				},
 			},
-			fixtures: []string{fixtures.PublicKey},
+			fixtures: []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: nil,
 				err:    store.ErrNoDocuments,
@@ -260,7 +260,7 @@ func TestPublicKeyUpdate(t *testing.T) {
 					},
 				},
 			},
-			fixtures: []string{fixtures.PublicKey},
+			fixtures: []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				pubKey: &models.PublicKey{
 					Data:        []byte("test"),
@@ -311,21 +311,21 @@ func TestPublicKeyDelete(t *testing.T) {
 			description: "fails when public key is not found due to fingerprint",
 			fingerprint: "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "fails when public key is not found due to tenant",
 			fingerprint: "fingerprint",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when public key is found",
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}

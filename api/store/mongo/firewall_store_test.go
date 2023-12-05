@@ -44,7 +44,7 @@ func TestFirewallRuleList(t *testing.T) {
 		},
 		{
 			description: "succeeds when a firewall rule is found",
-			fixtures:    []string{fixtures.FirewallRule},
+			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rules: []models.FirewallRule{
 					{
@@ -102,7 +102,7 @@ func TestFirewallRuleGet(t *testing.T) {
 		{
 			description: "fails when firewall rule is not found",
 			id:          "6504b7bd9b6c4a63a9ccc021",
-			fixtures:    []string{fixtures.FirewallRule},
+			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rule: nil,
 				err:  store.ErrNoDocuments,
@@ -111,7 +111,7 @@ func TestFirewallRuleGet(t *testing.T) {
 		{
 			description: "succeeds when firewall rule is found",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			fixtures:    []string{fixtures.FirewallRule},
+			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rule: &models.FirewallRule{
 					ID:       "6504b7bd9b6c4a63a9ccc053",
@@ -181,7 +181,7 @@ func TestFirewallRuleUpdate(t *testing.T) {
 					},
 				},
 			},
-			fixtures: []string{fixtures.FirewallRule},
+			fixtures: []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rule: nil,
 				err:  store.ErrNoDocuments,
@@ -203,7 +203,7 @@ func TestFirewallRuleUpdate(t *testing.T) {
 					},
 				},
 			},
-			fixtures: []string{fixtures.FirewallRule},
+			fixtures: []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rule: &models.FirewallRule{
 					ID:       "6504b7bd9b6c4a63a9ccc053",
@@ -260,7 +260,7 @@ func TestFirewallRuleDelete(t *testing.T) {
 		{
 			description: "succeeds when rule is found",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			fixtures:    []string{fixtures.FirewallRule},
+			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    nil,
 		},
 	}

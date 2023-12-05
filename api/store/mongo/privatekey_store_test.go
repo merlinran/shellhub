@@ -74,7 +74,7 @@ func TestPrivateKeyGet(t *testing.T) {
 		{
 			description: "fails when private key is not found",
 			fingerprint: "nonexistent",
-			fixtures:    []string{fixtures.PrivateKey},
+			fixtures:    []string{fixtures.FixturePrivateKeys},
 			expected: Expected{
 				privKey: nil,
 				err:     store.ErrNoDocuments,
@@ -83,7 +83,7 @@ func TestPrivateKeyGet(t *testing.T) {
 		{
 			description: "succeeds when private key is found",
 			fingerprint: "fingerprint",
-			fixtures:    []string{fixtures.PrivateKey},
+			fixtures:    []string{fixtures.FixturePrivateKeys},
 			expected: Expected{
 				privKey: &models.PrivateKey{
 					Data:        []byte("test"),

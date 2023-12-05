@@ -46,7 +46,7 @@ func TestAnnouncementList(t *testing.T) {
 		},
 		{
 			description: "succeeds when announcement list is not empty",
-			fixtures:    []string{fixtures.Announcement},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected: Expected{
 				ann: []models.AnnouncementShort{
 					{
@@ -95,7 +95,7 @@ func TestAnnouncementGet(t *testing.T) {
 		{
 			description: "fails when announcement is not found",
 			uuid:        "nonexistent",
-			fixtures:    []string{fixtures.Announcement},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected: Expected{
 				ann: nil,
 				err: store.ErrNoDocuments,
@@ -104,7 +104,7 @@ func TestAnnouncementGet(t *testing.T) {
 		{
 			description: "succeeds when announcement is found",
 			uuid:        "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Announcement},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected: Expected{
 				ann: &models.Announcement{
 					Date:    time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -188,7 +188,7 @@ func TestAnnouncementUpdate(t *testing.T) {
 				Title:   "edited title",
 				Content: "edited content",
 			},
-			fixtures: []string{fixtures.Announcement},
+			fixtures: []string{fixtures.FixtureAnnouncements},
 			expected: store.ErrNoDocuments,
 		},
 		{
@@ -198,7 +198,7 @@ func TestAnnouncementUpdate(t *testing.T) {
 				Title:   "edited title",
 				Content: "edited content",
 			},
-			fixtures: []string{fixtures.Announcement},
+			fixtures: []string{fixtures.FixtureAnnouncements},
 			expected: nil,
 		},
 	}
@@ -232,13 +232,13 @@ func TestAnnouncementDelete(t *testing.T) {
 		{
 			description: "fails when announcement is not found",
 			uuid:        "nonexistent",
-			fixtures:    []string{fixtures.Announcement},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when announcement is found",
 			uuid:        "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Announcement},
+			fixtures:    []string{fixtures.FixtureAnnouncements},
 			expected:    nil,
 		},
 	}

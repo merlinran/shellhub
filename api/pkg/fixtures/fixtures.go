@@ -8,18 +8,19 @@ import (
 )
 
 const (
-	Announcement        = "announcement"          // Check "fixtures.data.announcement" for fixture info
-	Device              = "device"                // Device with status "accepted". Check "fixtures.data.device" for fixture info
-	DevicePending       = "device_pending"        // Device with status "pending". Check "fixtures.data.device_pending" for fixture info
-	DeviceInvalidTenant = "device_invalid_tenant" // Device with tenant "invalid". Check "fixtures.data.device_invalid_tenant" for fixture info
-	Session             = "session"               // Check "fixtures.data.session" for fixture info
-	FirewallRule        = "firewall_rule"         // Check "fixtures.data.firewall_rule" for fixture info
-	PublicKey           = "public_key"            // Check "fixtures.data.public_key" for fixture info
-	PrivateKey          = "private_key"           // Check "fixtures.data.private_key" for fixture info
-	License             = "license"               // Check "fixtures.data.license" for fixture info
-	User                = "user"                  // Check "fixtures.data.user" for fixture info
-	Member              = "member"                // Check "fixtures.data.member" for fixture info
-	Namespace           = "namespace"             // Check "fixtures.data.namespace" for fixture info
+	FixtureAnnouncements    = "announcements"     // Check "fixtures.data.announcement" for fixture info
+	FixtureConnectedDevices = "connected_devices" // Check "fixtures.data.connected_devices" for fixture info
+	FixtureDevices          = "devices"           // Check "fixtures.data.device" for fixture info
+	FixtureSessions         = "sessions"          // Check "fixtures.data.session" for fixture info
+	FixtureActiveSessions   = "active_sessions"   // Check "fixtures.data.active_session" for fixture info
+	FixtureRecordedSessions = "recorded_sessions" // Check "fixtures.data.recorded_session" for fixture info
+	FixtureFirewallRules    = "firewall_rules"    // Check "fixtures.data.firewall_rule" for fixture info
+	FixturePublicKeys       = "public_keys"       // Check "fixtures.data.public_key" for fixture info
+	FixturePrivateKeys      = "private_keys"      // Check "fixtures.data.private_key" for fixture info
+	FixtureLicenses         = "licenses"          // Check "fixtures.data.license" for fixture info
+	FixtureUsers            = "users"             // Check "fixtures.data.user" for fixture iefo
+	FixtureNamespaces       = "namespaces"        // Check "fixtures.data.namespace" for fixture info
+	FixtureRecoveryTokens   = "recovery_tokens"   // Check "fixtures.data.recovery_tokens" for fixture info
 )
 
 // Init configures the mongotest for the provided host's database. It is necessary

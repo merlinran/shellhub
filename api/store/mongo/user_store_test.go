@@ -39,7 +39,7 @@ func TestUserList(t *testing.T) {
 	}{
 		{
 			description: "succeeds when users are found",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				users: []models.User{
 					{
@@ -98,7 +98,7 @@ func TestUserListWithFilter(t *testing.T) {
 	}{
 		{
 			description: "succeeds when no users are found",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				users: []models.User{},
 				count: 0,
@@ -192,7 +192,7 @@ func TestUserGetByUsername(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			username:    "nonexistent",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				user: nil,
 				err:  store.ErrNoDocuments,
@@ -201,7 +201,7 @@ func TestUserGetByUsername(t *testing.T) {
 		{
 			description: "succeeds when user is found",
 			username:    "john_doe",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				user: &models.User{
 					ID:             "507f1f77bcf86cd799439011",
@@ -258,7 +258,7 @@ func TestUserGetByEmail(t *testing.T) {
 		{
 			description: "fails when email is not found",
 			email:       "nonexistent",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				user: nil,
 				err:  store.ErrNoDocuments,
@@ -267,7 +267,7 @@ func TestUserGetByEmail(t *testing.T) {
 		{
 			description: "succeeds when email is found",
 			email:       "user@test.com",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected: Expected{
 				user: &models.User{
 					ID:             "507f1f77bcf86cd799439011",
@@ -326,7 +326,7 @@ func TestUserGetByID(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			id:          "507f1f77bcf86cd7994390bb",
-			fixtures:    []string{fixtures.User, fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureNamespaces},
 			expected: Expected{
 				user: nil,
 				ns:   0,
@@ -337,7 +337,7 @@ func TestUserGetByID(t *testing.T) {
 			description: "succeeds when user is found with ns equal false",
 			id:          "507f1f77bcf86cd799439011",
 			ns:          false,
-			fixtures:    []string{fixtures.User, fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureNamespaces},
 			expected: Expected{
 				user: &models.User{
 					ID:             "507f1f77bcf86cd799439011",
@@ -363,7 +363,7 @@ func TestUserGetByID(t *testing.T) {
 			description: "succeeds when user is found with ns equal true",
 			id:          "507f1f77bcf86cd799439011",
 			ns:          true,
-			fixtures:    []string{fixtures.User, fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureNamespaces},
 			expected: Expected{
 				user: &models.User{
 					ID:             "507f1f77bcf86cd799439011",
@@ -425,13 +425,13 @@ func TestUserUpdateData(t *testing.T) {
 					Email:    "edited@test.com",
 				},
 			},
-			fixtures: []string{fixtures.User},
+			fixtures: []string{fixtures.FixtureUsers},
 			expected: store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			data: models.User{
 				LastLogin: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
 				UserData: models.UserData{
@@ -475,14 +475,14 @@ func TestUserUpdatePassword(t *testing.T) {
 			description: "fails when user is not found",
 			id:          "000000000000000000000000",
 			password:    "other_password",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
 			password:    "other_password",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    nil,
 		},
 	}
@@ -516,13 +516,13 @@ func TestUserUpdateAccountStatus(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			id:          "000000000000000000000000",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    nil,
 		},
 	}
@@ -564,7 +564,7 @@ func TestUserUpdateFromAdmin(t *testing.T) {
 			username:    "other_name",
 			email:       "other.email@test.com",
 			password:    "other_password",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -574,7 +574,7 @@ func TestUserUpdateFromAdmin(t *testing.T) {
 			username:    "other_name",
 			email:       "other.email@test.com",
 			password:    "other_password",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    nil,
 		},
 	}
@@ -650,7 +650,7 @@ func TestUserTokenGet(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			id:          "000000000000000000000000",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureRecoveryTokens},
 			expected: Expected{
 				token: nil,
 				err:   store.ErrNoDocuments,
@@ -659,7 +659,7 @@ func TestUserTokenGet(t *testing.T) {
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureRecoveryTokens},
 			expected: Expected{
 				token: &models.UserTokenRecover{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -700,13 +700,13 @@ func TestUserDeleteTokens(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			id:          "000000000000000000000000",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureRecoveryTokens},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers, fixtures.FixtureRecoveryTokens},
 			expected:    nil,
 		},
 	}
@@ -740,13 +740,13 @@ func TestUserDelete(t *testing.T) {
 		{
 			description: "fails when user is not found",
 			id:          "000000000000000000000000",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when user is found",
 			id:          "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.User},
+			fixtures:    []string{fixtures.FixtureUsers},
 			expected:    nil,
 		},
 	}

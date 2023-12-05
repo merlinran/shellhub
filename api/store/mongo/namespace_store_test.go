@@ -39,7 +39,7 @@ func TestNamespaceList(t *testing.T) {
 		{
 			description: "succeeds",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: []models.Namespace{
 					{
@@ -101,7 +101,7 @@ func TestNamespaceGet(t *testing.T) {
 		{
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -110,7 +110,7 @@ func TestNamespaceGet(t *testing.T) {
 		{
 			description: "succeeds when tenant is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -170,7 +170,7 @@ func TestNamespaceGetByName(t *testing.T) {
 		{
 			description: "fails when namespace is not found",
 			name:        "nonexistent",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -179,7 +179,7 @@ func TestNamespaceGetByName(t *testing.T) {
 		{
 			description: "succeeds when namespace is found",
 			name:        "namespace",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -238,7 +238,7 @@ func TestNamespaceGetFirst(t *testing.T) {
 		{
 			description: "fails when member is not found",
 			member:      "000000000000000000000000",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -247,7 +247,7 @@ func TestNamespaceGetFirst(t *testing.T) {
 		{
 			description: "succeeds when member is found",
 			member:      "507f1f77bcf86cd799439011",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -374,7 +374,7 @@ func TestNamespaceRename(t *testing.T) {
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
 			name:        "edited-namespace",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -384,7 +384,7 @@ func TestNamespaceRename(t *testing.T) {
 			description: "succeeds when tenant is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			name:        "edited-namespace",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -445,7 +445,7 @@ func TestNamespaceUpdate(t *testing.T) {
 				MaxDevices: 3,
 				Settings:   &models.NamespaceSettings{SessionRecord: true},
 			},
-			fixtures: []string{fixtures.Namespace},
+			fixtures: []string{fixtures.FixtureNamespaces},
 			expected: store.ErrNoDocuments,
 		},
 		{
@@ -456,7 +456,7 @@ func TestNamespaceUpdate(t *testing.T) {
 				MaxDevices: 3,
 				Settings:   &models.NamespaceSettings{SessionRecord: true},
 			},
-			fixtures: []string{fixtures.Namespace},
+			fixtures: []string{fixtures.FixtureNamespaces},
 			expected: nil,
 		},
 	}
@@ -490,13 +490,13 @@ func TestNamespaceDelete(t *testing.T) {
 		{
 			description: "fails when namespace is not found",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when namespace is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    nil,
 		},
 	}
@@ -539,7 +539,7 @@ func TestNamespaceAddMember(t *testing.T) {
 			tenant:      "nonexistent",
 			member:      "6509de884238881ac1b2b289",
 			role:        guard.RoleObserver,
-			fixtures:    []string{fixtures.Namespace, fixtures.Member},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -550,7 +550,7 @@ func TestNamespaceAddMember(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			member:      "6509e169ae6144b2f56bf288",
 			role:        guard.RoleObserver,
-			fixtures:    []string{fixtures.Namespace, fixtures.Member},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: ErrNamespaceDuplicatedMember,
@@ -561,7 +561,7 @@ func TestNamespaceAddMember(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			member:      "6509de884238881ac1b2b289",
 			role:        guard.RoleObserver,
-			fixtures:    []string{fixtures.Namespace, fixtures.Member},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -624,7 +624,7 @@ func TestNamespaceEditMember(t *testing.T) {
 			tenant:      "nonexistent",
 			member:      "000000000000000000000000",
 			role:        guard.RoleObserver,
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    ErrUserNotFound,
 		},
 		{
@@ -632,7 +632,7 @@ func TestNamespaceEditMember(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			member:      "6509e169ae6144b2f56bf288",
 			role:        guard.RoleOperator,
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    nil,
 		},
 	}
@@ -673,7 +673,7 @@ func TestNamespaceRemoveMember(t *testing.T) {
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
 			member:      "6509de884238881ac1b2b289",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: store.ErrNoDocuments,
@@ -683,7 +683,7 @@ func TestNamespaceRemoveMember(t *testing.T) {
 			description: "fails when member is not found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			member:      "000000000000000000000000",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns:  nil,
 				err: ErrUserNotFound,
@@ -693,7 +693,7 @@ func TestNamespaceRemoveMember(t *testing.T) {
 			description: "succeeds when tenant and user is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			member:      "6509e169ae6144b2f56bf288",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: &models.Namespace{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -746,14 +746,14 @@ func TestNamespaceSetSessionRecord(t *testing.T) {
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
 			sessionRec:  true,
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when tenant is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			sessionRec:  true,
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected:    nil,
 		},
 	}
@@ -792,7 +792,7 @@ func TestNamespaceGetSessionRecord(t *testing.T) {
 		{
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				set: false,
 				err: store.ErrNoDocuments,
@@ -801,7 +801,7 @@ func TestNamespaceGetSessionRecord(t *testing.T) {
 		{
 			description: "succeeds when tenant is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				set: true,
 				err: nil,

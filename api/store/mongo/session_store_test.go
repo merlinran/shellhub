@@ -36,7 +36,13 @@ func TestSessionList(t *testing.T) {
 	}{
 		{
 			description: "succeeds when sessions are found",
-			fixtures:    []string{fixtures.Session, fixtures.Device, fixtures.Namespace},
+			fixtures: []string{
+				fixtures.FixtureNamespaces,
+				fixtures.FixtureDevices,
+				fixtures.FixtureConnectedDevices,
+				fixtures.FixtureSessions,
+				fixtures.FixtureActiveSessions,
+			},
 			expected: Expected{
 				s: []models.Session{
 					{
@@ -116,7 +122,13 @@ func TestSessionGet(t *testing.T) {
 		{
 			description: "fails when session is not found",
 			UID:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Session, fixtures.Device, fixtures.Namespace},
+			fixtures: []string{
+				fixtures.FixtureNamespaces,
+				fixtures.FixtureDevices,
+				fixtures.FixtureConnectedDevices,
+				fixtures.FixtureSessions,
+				fixtures.FixtureActiveSessions,
+			},
 			expected: Expected{
 				s:   nil,
 				err: store.ErrNoDocuments,
@@ -125,7 +137,13 @@ func TestSessionGet(t *testing.T) {
 		{
 			description: "succeeds when session is found",
 			UID:         models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
-			fixtures:    []string{fixtures.Session, fixtures.Device, fixtures.Namespace},
+			fixtures: []string{
+				fixtures.FixtureNamespaces,
+				fixtures.FixtureDevices,
+				fixtures.FixtureConnectedDevices,
+				fixtures.FixtureSessions,
+				fixtures.FixtureActiveSessions,
+			},
 			expected: Expected{
 				s: &models.Session{
 					StartedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -196,7 +214,7 @@ func TestSessionCreate(t *testing.T) {
 	}{
 		{
 			description: "",
-			fixtures:    []string{fixtures.Device, fixtures.Namespace},
+			fixtures:    []string{fixtures.FixtureDevices, fixtures.FixtureNamespaces},
 			session: models.Session{
 				Username:      "username",
 				UID:           "uid",
@@ -241,14 +259,14 @@ func TestSessionUpdateDeviceUID(t *testing.T) {
 			description: "fails when device is not found",
 			oldUID:      models.UID("nonexistent"),
 			newUID:      models.UID("uid"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when device is found",
 			oldUID:      models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			newUID:      models.UID("uid"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    nil,
 		},
 	}
@@ -284,14 +302,14 @@ func TestSessionSetAuthenticated(t *testing.T) {
 			description:  "fails when session is not found",
 			UID:          models.UID("nonexistent"),
 			authenticate: false,
-			fixtures:     []string{fixtures.Session},
+			fixtures:     []string{fixtures.FixtureSessions},
 			expected:     store.ErrNoDocuments,
 		},
 		{
 			description:  "succeeds when session is found",
 			UID:          models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
 			authenticate: false,
-			fixtures:     []string{fixtures.Session},
+			fixtures:     []string{fixtures.FixtureSessions},
 			expected:     nil,
 		},
 	}
@@ -327,14 +345,14 @@ func TestSessionSetRecorded(t *testing.T) {
 			description:  "fails when session is not found",
 			UID:          models.UID("nonexistent"),
 			authenticate: false,
-			fixtures:     []string{fixtures.Session},
+			fixtures:     []string{fixtures.FixtureSessions},
 			expected:     store.ErrNoDocuments,
 		},
 		{
 			description:  "succeeds when session is found",
 			UID:          models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
 			authenticate: false,
-			fixtures:     []string{fixtures.Session},
+			fixtures:     []string{fixtures.FixtureSessions},
 			expected:     nil,
 		},
 	}
@@ -368,13 +386,13 @@ func TestSessionSetLastSeen(t *testing.T) {
 		{
 			description: "fails when session is not found",
 			UID:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when session is found",
 			UID:         models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    nil,
 		},
 	}
@@ -408,13 +426,13 @@ func TestSessionDeleteActives(t *testing.T) {
 		{
 			description: "fails when session is not found",
 			UID:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when session is found",
 			UID:         models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected:    nil,
 		},
 	}
@@ -454,7 +472,7 @@ func TestSessionGetRecordFrame(t *testing.T) {
 		{
 			description: "succeeds",
 			UID:         models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions, fixtures.FixtureRecordedSessions},
 			expected: Expected{
 				r: []models.RecordedSession{
 					{
@@ -510,7 +528,7 @@ func TestSessionCreateRecordFrame(t *testing.T) {
 				Width:    0,
 				Height:   0,
 			},
-			fixtures: []string{fixtures.Session},
+			fixtures: []string{fixtures.FixtureSessions},
 			expected: store.ErrNoDocuments,
 		},
 		{
@@ -524,7 +542,7 @@ func TestSessionCreateRecordFrame(t *testing.T) {
 				Width:    0,
 				Height:   0,
 			},
-			fixtures: []string{fixtures.Session},
+			fixtures: []string{fixtures.FixtureSessions},
 			expected: nil,
 		},
 	}
@@ -558,13 +576,13 @@ func TestSessionDeleteRecordFrame(t *testing.T) {
 		{
 			description: "fails when record frame is not found",
 			UID:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions, fixtures.FixtureRecordedSessions},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when record frame is found",
 			UID:         models.UID("a3b0431f5df6a7827945d2e34872a5c781452bc36de42f8b1297fd9ecb012f68"),
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions, fixtures.FixtureRecordedSessions},
 			expected:    nil,
 		},
 	}

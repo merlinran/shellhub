@@ -42,7 +42,7 @@ func TestLicenseLoad(t *testing.T) {
 		},
 		{
 			description: "succeeds when license is found",
-			fixtures:    []string{fixtures.License},
+			fixtures:    []string{fixtures.FixtureLicenses},
 			expected: Expected{
 				license: &models.License{
 					CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),

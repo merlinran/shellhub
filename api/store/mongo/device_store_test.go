@@ -45,7 +45,7 @@ func TestDeviceList(t *testing.T) {
 		},
 		{
 			description: "succeeds when devices are found",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices, fixtures.FixtureConnectedDevices},
 			expected: Expected{
 				dev: []models.Device{
 					{
@@ -109,7 +109,7 @@ func TestDeviceListByUsage(t *testing.T) {
 		{
 			description: "returns an empty list when tenant not exist",
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected: Expected{
 				uid: []models.UID{},
 				len: 0,
@@ -119,7 +119,7 @@ func TestDeviceListByUsage(t *testing.T) {
 		{
 			description: "succeeds when has 1 or more device sessions",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Session},
+			fixtures:    []string{fixtures.FixtureSessions},
 			expected: Expected{
 				uid: []models.UID{"2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"},
 				len: 1,
@@ -161,7 +161,7 @@ func TestDeviceGet(t *testing.T) {
 		{
 			description: "fails when namespace is not found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices, fixtures.FixtureConnectedDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -170,7 +170,7 @@ func TestDeviceGet(t *testing.T) {
 		{
 			description: "fails when device is not found",
 			uid:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices, fixtures.FixtureConnectedDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -179,7 +179,7 @@ func TestDeviceGet(t *testing.T) {
 		{
 			description: "fails when device is not found due to tenant",
 			uid:         models.UID("5600560h6ed5h960969e7f358g4568491247198ge8537e9g448609fff1b231f"),
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices, fixtures.FixtureConnectedDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -188,7 +188,7 @@ func TestDeviceGet(t *testing.T) {
 		{
 			description: "succeeds when device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices, fixtures.FixtureConnectedDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -252,7 +252,7 @@ func TestDeviceGetByMac(t *testing.T) {
 			mac:         "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			status:      models.DeviceStatus(""),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -263,7 +263,7 @@ func TestDeviceGetByMac(t *testing.T) {
 			mac:         "mac",
 			tenant:      "nonexistent",
 			status:      models.DeviceStatus(""),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -274,7 +274,7 @@ func TestDeviceGetByMac(t *testing.T) {
 			mac:         "mac",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			status:      models.DeviceStatus(""),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -303,7 +303,7 @@ func TestDeviceGetByMac(t *testing.T) {
 			mac:         "mac",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			status:      models.DeviceStatus("accepted"),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -366,7 +366,7 @@ func TestDeviceGetByName(t *testing.T) {
 			hostname:    "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			status:      models.DeviceStatusAccepted,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -377,7 +377,7 @@ func TestDeviceGetByName(t *testing.T) {
 			hostname:    "hostname",
 			tenant:      "nonexistent",
 			status:      models.DeviceStatusAccepted,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -388,7 +388,7 @@ func TestDeviceGetByName(t *testing.T) {
 			hostname:    "hostname",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			status:      models.DeviceStatusAccepted,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -449,7 +449,7 @@ func TestDeviceGetByUID(t *testing.T) {
 			description: "fails when device is not found due to UID",
 			uid:         models.UID("nonexistent"),
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -459,7 +459,7 @@ func TestDeviceGetByUID(t *testing.T) {
 			description: "fails when device is not found due to tenant",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			tenant:      "nonexistent",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -469,7 +469,7 @@ func TestDeviceGetByUID(t *testing.T) {
 			description: "succeeds when device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -530,7 +530,7 @@ func TestDeviceLookup(t *testing.T) {
 			description: "fails when namespace does not exist",
 			namespace:   "nonexistent",
 			hostname:    "hostname",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -540,7 +540,7 @@ func TestDeviceLookup(t *testing.T) {
 			description: "fails when device does not exist due to name",
 			namespace:   "namespace",
 			hostname:    "nonexistent",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -550,7 +550,7 @@ func TestDeviceLookup(t *testing.T) {
 			description: "fails when device does not exist due to tenant-id",
 			namespace:   "namespace",
 			hostname:    "invalid_tenant",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -560,7 +560,7 @@ func TestDeviceLookup(t *testing.T) {
 			description: "fails when device does not exist due to status other than accepted",
 			namespace:   "namespace",
 			hostname:    "pending",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				dev: nil,
 				err: store.ErrNoDocuments,
@@ -570,7 +570,7 @@ func TestDeviceLookup(t *testing.T) {
 			description: "succeeds when namespace exists and hostname status is accepted",
 			namespace:   "namespace",
 			hostname:    "hostname",
-			fixtures:    []string{fixtures.Namespace, fixtures.Device},
+			fixtures:    []string{fixtures.FixtureNamespaces, fixtures.FixtureDevices},
 			expected: Expected{
 				dev: &models.Device{
 					CreatedAt:        time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -670,14 +670,14 @@ func TestDeviceRename(t *testing.T) {
 			description: "fails when the device is not found",
 			uid:         models.UID("nonexistent"),
 			hostname:    "new_hostname",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when the device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			hostname:    "new_hostname",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -713,14 +713,14 @@ func TestDeviceUpdateStatus(t *testing.T) {
 			description: "fails when the device is not found",
 			uid:         models.UID("nonexistent"),
 			status:      "accepted",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when the device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			status:      "accepted",
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -756,14 +756,14 @@ func TestDeviceUpdateOnline(t *testing.T) {
 			description: "fails when the device is not found",
 			uid:         models.UID("nonexistent"),
 			online:      true,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when the device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			online:      true,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -799,14 +799,14 @@ func TestDeviceUpdateLastSeen(t *testing.T) {
 			description: "fails when the device is not found",
 			uid:         models.UID("nonexistent"),
 			now:         time.Now(),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when the device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			now:         time.Now(),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -842,14 +842,14 @@ func TestDeviceSetOnline(t *testing.T) {
 			description: "succeeds when UID is valid and online is true",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			online:      true,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 		{
 			description: "succeeds when UID is valid and online is false",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
 			online:      false,
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -888,7 +888,7 @@ func TestDeviceSetPosition(t *testing.T) {
 				Longitude: 1,
 				Latitude:  1,
 			},
-			fixtures: []string{fixtures.Device},
+			fixtures: []string{fixtures.FixtureDevices},
 			expected: store.ErrNoDocuments,
 		},
 		{
@@ -898,7 +898,7 @@ func TestDeviceSetPosition(t *testing.T) {
 				Longitude: 1,
 				Latitude:  1,
 			},
-			fixtures: []string{fixtures.Device},
+			fixtures: []string{fixtures.FixtureDevices},
 			expected: nil,
 		},
 	}
@@ -934,7 +934,7 @@ func TestDeviceChooser(t *testing.T) {
 			description: "",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			chosen:      []string{""},
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -968,13 +968,13 @@ func TestDeviceDelete(t *testing.T) {
 		{
 			description: "fails when device is not found",
 			uid:         models.UID("nonexistent"),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when device is found",
 			uid:         models.UID("2300230e3ca2f637636b4d025d2235269014865db5204b6d115386cbee89809c"),
-			fixtures:    []string{fixtures.Device},
+			fixtures:    []string{fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}

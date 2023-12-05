@@ -33,7 +33,7 @@ func TestPublicKeyAddTag(t *testing.T) {
 			fingerprint: "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag0",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -41,7 +41,7 @@ func TestPublicKeyAddTag(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "nonexistent",
 			tag:         "tag0",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -49,7 +49,7 @@ func TestPublicKeyAddTag(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag0",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}
@@ -87,7 +87,7 @@ func TestPublicKeyRemoveTag(t *testing.T) {
 			fingerprint: "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -95,7 +95,7 @@ func TestPublicKeyRemoveTag(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "nonexistent",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -103,7 +103,7 @@ func TestPublicKeyRemoveTag(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag0",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -111,7 +111,7 @@ func TestPublicKeyRemoveTag(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}
@@ -149,7 +149,7 @@ func TestPublicKeyUpdateTags(t *testing.T) {
 			fingerprint: "nonexistent",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tags:        []string{"tag1"},
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -157,7 +157,7 @@ func TestPublicKeyUpdateTags(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "nonexistent",
 			tags:        []string{"tag1"},
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -165,7 +165,7 @@ func TestPublicKeyUpdateTags(t *testing.T) {
 			fingerprint: "fingerprint",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tags:        []string{"tag1"},
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}
@@ -205,7 +205,7 @@ func TestPublicKeyRenameTag(t *testing.T) {
 			tenant:      "nonexistent",
 			oldTag:      "tag1",
 			newTag:      "edited-tag",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -213,7 +213,7 @@ func TestPublicKeyRenameTag(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			oldTag:      "tag0",
 			newTag:      "edited-tag",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
@@ -221,7 +221,7 @@ func TestPublicKeyRenameTag(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			oldTag:      "tag1",
 			newTag:      "edited-tag",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}
@@ -257,21 +257,21 @@ func TestPublicKeyDeleteTag(t *testing.T) {
 			description: "fails when public key is not found due to tenant",
 			tenant:      "nonexistent",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "fails when public key is not found due to tag",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag0",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when public key is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected:    nil,
 		},
 	}
@@ -311,7 +311,7 @@ func TestPublicKeyGetTags(t *testing.T) {
 		{
 			description: "succeeds when tags list is greater than 1",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey},
+			fixtures:    []string{fixtures.FixturePublicKeys},
 			expected: Expected{
 				tags: []string{"tag1"},
 				len:  1,

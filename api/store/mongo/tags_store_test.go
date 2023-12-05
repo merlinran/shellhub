@@ -33,7 +33,7 @@ func TestTagsGet(t *testing.T) {
 		{
 			description: "succeeds when tag is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			fixtures:    []string{fixtures.PublicKey, fixtures.FirewallRule, fixtures.Device},
+			fixtures:    []string{fixtures.FixturePublicKeys, fixtures.FixtureFirewallRules, fixtures.FixtureDevices},
 			expected: Expected{
 				tags: []string{"tag1"},
 				len:  1,
@@ -74,7 +74,7 @@ func TestTagRename(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			oldTag:      "tag1",
 			newTag:      "edited-tag",
-			fixtures:    []string{fixtures.PublicKey, fixtures.FirewallRule, fixtures.Device},
+			fixtures:    []string{fixtures.FixturePublicKeys, fixtures.FixtureFirewallRules, fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
@@ -109,7 +109,7 @@ func TestTagDelete(t *testing.T) {
 			description: "succeeds when tag is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			tag:         "tag1",
-			fixtures:    []string{fixtures.PublicKey, fixtures.FirewallRule, fixtures.Device},
+			fixtures:    []string{fixtures.FixturePublicKeys, fixtures.FixtureFirewallRules, fixtures.FixtureDevices},
 			expected:    nil,
 		},
 	}
