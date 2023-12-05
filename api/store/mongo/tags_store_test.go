@@ -35,8 +35,9 @@ func TestTagsGet(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			fixtures:    []string{fixtures.FixturePublicKeys, fixtures.FixtureFirewallRules, fixtures.FixtureDevices},
 			expected: Expected{
-				tags: []string{"tag1"},
-				len:  1,
+				// TODO: remove tag1 from all fixtures
+				tags: []string{"tag-1", "tag1"},
+				len:  2,
 				err:  nil,
 			},
 		},
