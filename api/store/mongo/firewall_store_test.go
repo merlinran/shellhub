@@ -30,11 +30,13 @@ func TestFirewallRuleList(t *testing.T) {
 
 	cases := []struct {
 		description string
+		page        paginator.Query
 		fixtures    []string
 		expected    Expected
 	}{
 		{
 			description: "succeeds when no firewall rules are found",
+			page:        paginator.Query{Page: -1, PerPage: -1},
 			fixtures:    []string{},
 			expected: Expected{
 				rules: []models.FirewallRule{},
@@ -44,6 +46,7 @@ func TestFirewallRuleList(t *testing.T) {
 		},
 		{
 			description: "succeeds when a firewall rule is found",
+			page:        paginator.Query{Page: -1, PerPage: -1},
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
 				rules: []models.FirewallRule{
@@ -58,12 +61,98 @@ func TestFirewallRuleList(t *testing.T) {
 							Username: ".*",
 							Filter: models.FirewallFilter{
 								Hostname: "",
-								Tags:     []string{"tag1"},
+								Tags:     []string{"tag-1"},
+							},
+						},
+					},
+					{
+						ID:       "e92f4a5d3e1a4f7b8b2b6e9a",
+						TenantID: "00000000-0000-4000-0000-000000000000",
+						FirewallRuleFields: models.FirewallRuleFields{
+							Priority: 2,
+							Action:   "allow",
+							Active:   true,
+							SourceIP: "192.168.1.10",
+							Username: "john.doe",
+							Filter: models.FirewallFilter{
+								Hostname: "",
+								Tags:     []string{"tag-1"},
+							},
+						},
+					},
+					{
+						ID:       "78c96f0a2e5b4dca8d78f00c",
+						TenantID: "00000000-0000-4000-0000-000000000000",
+						FirewallRuleFields: models.FirewallRuleFields{
+							Priority: 3,
+							Action:   "allow",
+							Active:   true,
+							SourceIP: "10.0.0.0/24",
+							Username: "admin",
+							Filter: models.FirewallFilter{
+								Hostname: "",
+								Tags:     []string{},
+							},
+						},
+					},
+					{
+						ID:       "3fd759a1ecb64ec5a07c8c0f",
+						TenantID: "00000000-0000-4000-0000-000000000000",
+						FirewallRuleFields: models.FirewallRuleFields{
+							Priority: 4,
+							Action:   "deny",
+							Active:   true,
+							SourceIP: "172.16.0.0/16",
+							Username: ".*",
+							Filter: models.FirewallFilter{
+								Hostname: "",
+								Tags:     []string{"tag-1"},
 							},
 						},
 					},
 				},
-				len: 1,
+				len: 4,
+				err: nil,
+			},
+		},
+		{
+			description: "succeeds when firewall rule list is not empty and paginator is different than -1",
+			page:        paginator.Query{Page: 2, PerPage: 2},
+			fixtures:    []string{fixtures.FixtureFirewallRules},
+			expected: Expected{
+				rules: []models.FirewallRule{
+					{
+						ID:       "78c96f0a2e5b4dca8d78f00c",
+						TenantID: "00000000-0000-4000-0000-000000000000",
+						FirewallRuleFields: models.FirewallRuleFields{
+							Priority: 3,
+							Action:   "allow",
+							Active:   true,
+							SourceIP: "10.0.0.0/24",
+							Username: "admin",
+							Filter: models.FirewallFilter{
+								Hostname: "",
+								Tags:     []string{},
+							},
+						},
+					},
+					{
+						ID:       "3fd759a1ecb64ec5a07c8c0f",
+						TenantID: "00000000-0000-4000-0000-000000000000",
+						FirewallRuleFields: models.FirewallRuleFields{
+							Priority: 4,
+							Action:   "deny",
+							Active:   true,
+							SourceIP: "172.16.0.0/16",
+							Username: ".*",
+							Filter: models.FirewallFilter{
+								Hostname: "",
+								Tags:     []string{"tag-1"},
+							},
+						},
+					},
+				},
+				len: 4,
 				err: nil,
 			},
 		},
@@ -74,7 +163,7 @@ func TestFirewallRuleList(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
 
-			rules, count, err := mongostore.FirewallRuleList(ctx, paginator.Query{Page: -1, PerPage: -1})
+			rules, count, err := mongostore.FirewallRuleList(ctx, tc.page)
 			assert.Equal(t, tc.expected, Expected{rules: rules, len: count, err: err})
 		})
 	}
