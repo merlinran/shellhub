@@ -213,7 +213,7 @@ func TestFirewallRuleGet(t *testing.T) {
 						Username: ".*",
 						Filter: models.FirewallFilter{
 							Hostname: "",
-							Tags:     []string{"tag1"},
+							Tags:     []string{"tag-1"},
 						},
 					},
 				},

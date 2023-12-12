@@ -30,14 +30,14 @@ func TestFirewallRuleAddTag(t *testing.T) {
 		{
 			description: "fails when firewall rule is not found",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "fails to add a tag that already exists",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
 		},
@@ -80,7 +80,7 @@ func TestFirewallRuleRemoveTag(t *testing.T) {
 		{
 			description: "fails when firewall rule is not found",
 			id:          "6504b7bd9b6c4a63a9ccc054",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
 		},
@@ -94,7 +94,7 @@ func TestFirewallRuleRemoveTag(t *testing.T) {
 		{
 			description: "succeeds when firewall rule and tag is found",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    nil,
 		},
@@ -130,14 +130,14 @@ func TestFirewallRuleUpdateTag(t *testing.T) {
 		{
 			description: "fails when firewall rule is not found",
 			id:          "6504b7bd9b6c4a63a9ccc054",
-			tags:        []string{"tag1", "tag2"},
+			tags:        []string{"tag-1", "tag2"},
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
 		},
 		{
 			description: "succeeds when firewall rule and tag is found",
 			id:          "6504b7bd9b6c4a63a9ccc053",
-			tags:        []string{"tag1", "tag2"},
+			tags:        []string{"tag-1", "tag2"},
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    nil,
 		},
@@ -174,7 +174,7 @@ func TestFirewallRuleRenameTags(t *testing.T) {
 		{
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
-			oldTag:      "tag1",
+			oldTag:      "tag-1",
 			newTag:      "edited-tag",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
@@ -190,7 +190,7 @@ func TestFirewallRuleRenameTags(t *testing.T) {
 		{
 			description: "succeeds when tenant and tag is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			oldTag:      "tag1",
+			oldTag:      "tag-1",
 			newTag:      "edited-tag",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    nil,
@@ -227,7 +227,7 @@ func TestFirewallRuleDeleteTags(t *testing.T) {
 		{
 			description: "fails when tenant is not found",
 			tenant:      "nonexistent",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    store.ErrNoDocuments,
 		},
@@ -241,7 +241,7 @@ func TestFirewallRuleDeleteTags(t *testing.T) {
 		{
 			description: "succeeds when tenant and tag is found",
 			tenant:      "00000000-0000-4000-0000-000000000000",
-			tag:         "tag1",
+			tag:         "tag-1",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected:    nil,
 		},
@@ -294,7 +294,7 @@ func TestFirewallRuleGetTags(t *testing.T) {
 			tenant:      "00000000-0000-4000-0000-000000000000",
 			fixtures:    []string{fixtures.FixtureFirewallRules},
 			expected: Expected{
-				tags: []string{"tag1"},
+				tags: []string{"tag-1"},
 				len:  1,
 				err:  nil,
 			},

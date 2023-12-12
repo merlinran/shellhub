@@ -33,18 +33,24 @@ func TestNamespaceList(t *testing.T) {
 	cases := []struct {
 		description string
 		tenant      string
+		page        paginator.Query
+		filters     []models.Filter
+		export      bool
 		fixtures    []string
 		expected    Expected
 	}{
 		{
-			description: "succeeds",
+			description: "succeeds when namespaces list is not empty",
 			tenant:      "00000000-0000-4000-0000-000000000000",
+			page:        paginator.Query{Page: -1, PerPage: -1},
+			filters:     []models.Filter{},
+			export:      false,
 			fixtures:    []string{fixtures.FixtureNamespaces},
 			expected: Expected{
 				ns: []models.Namespace{
 					{
 						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
-						Name:      "namespace",
+						Name:      "namespace-1",
 						Owner:     "507f1f77bcf86cd799439011",
 						TenantID:  "00000000-0000-4000-0000-000000000000",
 						Members: []models.Member{
@@ -60,8 +66,96 @@ func TestNamespaceList(t *testing.T) {
 						MaxDevices: -1,
 						Settings:   &models.NamespaceSettings{SessionRecord: true},
 					},
+					{
+						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						Name:      "namespace-2",
+						Owner:     "6509e169ae6144b2f56bf288",
+						TenantID:  "00000000-0000-4000-0000-000000000000",
+						Members: []models.Member{
+							{
+								ID:   "6509e169ae6144b2f56bf288",
+								Role: guard.RoleOwner,
+							},
+							{
+								ID:   "907f1f77bcf86cd799439022",
+								Role: guard.RoleOperator,
+							},
+						},
+						MaxDevices: 10,
+						Settings:   &models.NamespaceSettings{SessionRecord: false},
+					},
+					{
+						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						Name:      "namespace-3",
+						Owner:     "507f1f77bcf86cd799439011",
+						TenantID:  "00000000-0000-4000-0000-000000000000",
+						Members: []models.Member{
+							{
+								ID:   "507f1f77bcf86cd799439011",
+								Role: guard.RoleOwner,
+							},
+						},
+						MaxDevices: 3,
+						Settings:   &models.NamespaceSettings{SessionRecord: true},
+					},
+					{
+						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						Name:      "namespace-4",
+						Owner:     "6577267d8752d05270a4c07d",
+						TenantID:  "00000000-0000-4000-0000-000000000000",
+						Members: []models.Member{
+							{
+								ID:   "6577267d8752d05270a4c07d",
+								Role: guard.RoleOwner,
+							},
+						},
+						MaxDevices: -1,
+						Settings:   &models.NamespaceSettings{SessionRecord: true},
+					},
 				},
-				count: 1,
+				count: 4,
+				err:   nil,
+			},
+		},
+		{
+			description: "succeeds with pagination parameters",
+			tenant:      "00000000-0000-4000-0000-000000000000",
+			page:        paginator.Query{Page: 2, PerPage: 2},
+			filters:     []models.Filter{},
+			export:      false,
+			fixtures:    []string{fixtures.FixtureNamespaces},
+			expected: Expected{
+				ns: []models.Namespace{
+					{
+						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						Name:      "namespace-3",
+						Owner:     "507f1f77bcf86cd799439011",
+						TenantID:  "00000000-0000-4000-0000-000000000000",
+						Members: []models.Member{
+							{
+								ID:   "507f1f77bcf86cd799439011",
+								Role: guard.RoleOwner,
+							},
+						},
+						MaxDevices: 3,
+						Settings:   &models.NamespaceSettings{SessionRecord: true},
+					},
+					{
+						CreatedAt: time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+						Name:      "namespace-4",
+						Owner:     "6577267d8752d05270a4c07d",
+						TenantID:  "00000000-0000-4000-0000-000000000000",
+						Members: []models.Member{
+							{
+								ID:   "6577267d8752d05270a4c07d",
+								Role: guard.RoleOwner,
+							},
+						},
+						MaxDevices: -1,
+						Settings:   &models.NamespaceSettings{SessionRecord: true},
+					},
+				},
+				count: 4,
 				err:   nil,
 			},
 		},
@@ -72,7 +166,7 @@ func TestNamespaceList(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
 
-			ns, count, err := mongostore.NamespaceList(ctx, paginator.Query{Page: -1, PerPage: -1}, nil, false)
+			ns, count, err := mongostore.NamespaceList(ctx, tc.page, tc.filters, tc.export)
 			assert.Equal(t, tc.expected, Expected{ns: ns, count: count, err: err})
 		})
 	}
