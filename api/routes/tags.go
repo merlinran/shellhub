@@ -6,6 +6,7 @@ import (
 
 	"github.com/shellhub-io/shellhub/api/pkg/gateway"
 	"github.com/shellhub-io/shellhub/api/pkg/guard"
+	"github.com/shellhub-io/shellhub/api/proto/github.com/shellhub-io/shellhub/api/proto"
 	"github.com/shellhub-io/shellhub/pkg/api/requests"
 )
 
@@ -34,8 +35,8 @@ func (h *Handler) GetTags(c gateway.Context) error {
 	return c.JSON(http.StatusOK, tags)
 }
 
-func (h *Handler) RenameTag(c gateway.Context) error {
-	var req requests.TagRename
+func (h *Handler) RenameTag(c gateway.Context, req *proto.TagRenameRequest) error {
+	// var req requests.TagRename
 	var tenant string
 	if t := c.Tenant(); t != nil {
 		tenant = t.ID
