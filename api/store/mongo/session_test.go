@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"sort"
 	"testing"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/shellhub-io/shellhub/pkg/cache"
 	"github.com/shellhub-io/shellhub/pkg/models"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestSessionList(t *testing.T) {
@@ -191,28 +191,50 @@ func TestSessionList(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	// Due to the non-deterministic order of applying fixtures when dealing with multiple datasets,
-	// we ensure that both the expected and result arrays are correctly sorted.
-	sort := func(s []models.Session) {
-		sort.Slice(s, func(i, j int) bool {
-			return s[i].UID < s[j].UID
-		})
-	}
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	collection := mongostore.db.Collection("sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
 
+			var testData []interface{}
+			for _, session := range tc.expected.s {
+				doc := bson.M{
+					"started_at":    session.StartedAt,
+					"last_seen":     session.LastSeen,
+					"uid":           session.UID,
+					"device_uid":    session.DeviceUID,
+					"tenant_id":     session.TenantID,
+					"username":      session.Username,
+					"ip_address":    session.IPAddress,
+					"active":        session.Active,
+					"closed":        session.Closed,
+					"authenticated": session.Authenticated,
+					"recorded":      session.Recorded,
+					"type":          session.Type,
+					"term":          session.Term,
+					"position": bson.M{
+						"longitude": session.Position.Longitude,
+						"latitude":  session.Position.Latitude,
+					},
+				}
+				testData = append(testData, doc)
+			}
+
+			if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+				t.Fatalf("failed to insert documents: %v", err)
+			}
+
 			s, count, err := mongostore.SessionList(context.TODO(), tc.paginator)
-			sort(tc.expected.s)
-			sort(s)
 			assert.Equal(t, tc.expected, Expected{s: s, count: count, err: err})
 		})
 	}
@@ -296,17 +318,66 @@ func TestSessionGet(t *testing.T) {
 			},
 		},
 	}
+	ctx := context.TODO()
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	collection := mongostore.db.Collection("sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			var testData []interface{}
+			doc := bson.M{
+				"started_at":    tc.expected.s.StartedAt,
+				"last_seen":     tc.expected.s.LastSeen,
+				"uid":           tc.expected.s.UID,
+				"device_uid":    tc.expected.s.DeviceUID,
+				"tenant_id":     tc.expected.s.TenantID,
+				"username":      tc.expected.s.Username,
+				"ip_address":    tc.expected.s.IPAddress,
+				"active":        tc.expected.s.Active,
+				"closed":        tc.expected.s.Closed,
+				"authenticated": tc.expected.s.Authenticated,
+				"recorded":      tc.expected.s.Recorded,
+				"type":          tc.expected.s.Type,
+				"term":          tc.expected.s.Term,
+				"position": bson.M{
+					"longitude": tc.expected.s.Position.Longitude,
+					"latitude":  tc.expected.s.Position.Latitude,
+				},
+				"device": bson.M{
+					"created_at":         tc.expected.s.Device.CreatedAt,
+					"status_updated_at":  tc.expected.s.Device.StatusUpdatedAt,
+					"last_seen":          tc.expected.s.Device.LastSeen,
+					"uid":                tc.expected.s.Device.UID,
+					"name":               tc.expected.s.Device.Name,
+					"identity":           tc.expected.s.Device.Identity,
+					"info":               tc.expected.s.Device.Info,
+					"public_key":         tc.expected.s.Device.PublicKey,
+					"tenant_id":          tc.expected.s.Device.TenantID,
+					"online":             tc.expected.s.Device.Online,
+					"namespace":          tc.expected.s.Device.Namespace,
+					"status":             tc.expected.s.Device.Status,
+					"remote_addr":        tc.expected.s.Device.RemoteAddr,
+					"position":           tc.expected.s.Device.Position,
+					"tags":               tc.expected.s.Device.Tags,
+					"public_url":         tc.expected.s.Device.PublicURL,
+					"public_url_address": tc.expected.s.Device.PublicURLAddress,
+					"acceptable":         tc.expected.s.Device.Acceptable,
+				},
+			}
+			testData = append(testData, doc)
+
+			if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+				t.Fatalf("failed to insert documents: %v", err)
+			}
 
 			s, err := mongostore.SessionGet(context.TODO(), tc.UID)
 			assert.Equal(t, tc.expected, Expected{s: s, err: err})
@@ -587,16 +658,35 @@ func TestSessionGetRecordFrame(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
+
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	collection := mongostore.db.Collection("recorded_sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			var testData []interface{}
+			doc := bson.M{
+				"time":      tc.expected.r[0].Time,
+				"uid":       tc.expected.r[0].UID,
+				"message":   tc.expected.r[0].Message,
+				"tenant_id": tc.expected.r[0].TenantID,
+				"width":     tc.expected.r[0].Width,
+				"height":    tc.expected.r[0].Height,
+			}
+			testData = append(testData, doc)
+
+			if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+				t.Fatalf("failed to insert documents: %v", err)
+			}
 
 			r, count, err := mongostore.SessionGetRecordFrame(context.TODO(), tc.UID)
 			assert.Equal(t, tc.expected, Expected{r: r, count: count, err: err})
@@ -614,9 +704,9 @@ func TestSessionCreateRecordFrame(t *testing.T) {
 	}{
 		{
 			description: "fails when session is not found",
-			UID:         models.UID("nonexistent"),
+			UID:         models.UID(""),
 			record: &models.RecordedSession{
-				UID:      models.UID("nonexistent"),
+				UID:      models.UID(""),
 				Message:  "message",
 				TenantID: "00000000-0000-4000-0000-000000000000",
 				Time:     time.Now(),
@@ -642,16 +732,45 @@ func TestSessionCreateRecordFrame(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
+
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	// collection := mongostore.db.Collection("recorded_sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+			collection := mongostore.db.Collection("recorded_sessions")
+			if tc.UID != "" {
+				doc := bson.M{
+					"uid":       tc.record.UID,
+					"message":   tc.record.Message,
+					"tenant_id": tc.record.TenantID,
+					"time":      tc.record.Time,
+					"width":     tc.record.Width,
+					"height":    1,
+				}
+
+				if err := dbtest.InsertMockData(ctx, collection, []interface{}{doc}); err != nil {
+					t.Fatalf("failed to insert documents: %v", err)
+				}
+
+				collection := mongostore.db.Collection("sessions")
+				mockData := bson.M{
+					"uid":      tc.record.UID,
+					"recorded": false,
+				}
+				if err := dbtest.InsertMockData(ctx, collection, []interface{}{mockData}); err != nil {
+					t.Fatalf("failed to insert documents: %v", err)
+				}
+
+			}
 
 			err := mongostore.SessionCreateRecordFrame(context.TODO(), tc.UID, tc.record)
 			assert.Equal(t, tc.expected, err)
@@ -668,7 +787,7 @@ func TestSessionDeleteRecordFrame(t *testing.T) {
 	}{
 		{
 			description: "fails when record frame is not found",
-			UID:         models.UID("nonexistent"),
+			UID:         models.UID(""),
 			fixtures:    []string{fixtures.FixtureSessions, fixtures.FixtureRecordedSessions},
 			expected:    store.ErrNoDocuments,
 		},
@@ -680,16 +799,26 @@ func TestSessionDeleteRecordFrame(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
+
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+	collection := mongostore.db.Collection("recorded_sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			if tc.UID != "" {
+				doc := bson.M{"uid": tc.UID}
+				if err := dbtest.InsertMockData(ctx, collection, []interface{}{doc}); err != nil {
+					t.Fatalf("failed to insert documents: %v", err)
+				}
+			}
 
 			err := mongostore.SessionDeleteRecordFrame(context.TODO(), tc.UID)
 			assert.Equal(t, tc.expected, err)
@@ -735,18 +864,26 @@ func TestSessionDeleteRecordFrameByDate(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
+
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+	collection := mongostore.db.Collection("recorded_sessions")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint:errcheck
 
-			deletedCount, updatedCount, err := mongostore.SessionDeleteRecordFrameByDate(context.TODO(), tc.lte)
+			doc := bson.M{"lte": tc.lte}
+			if err := dbtest.InsertMockData(ctx, collection, []interface{}{doc}); err != nil {
+				t.Fatalf("failed to insert documents: %v", err)
+			}
+
+			deletedCount, updatedCount, err := mongostore.SessionDeleteRecordFrameByDate(ctx, tc.lte)
 			assert.Equal(t, tc.expected, Expected{deletedCount, updatedCount, err})
 		})
 	}

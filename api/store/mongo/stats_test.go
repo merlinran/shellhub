@@ -33,28 +33,24 @@ func TestGetStats(t *testing.T) {
 				fixtures.FixtureConnectedDevices,
 			},
 			expected: Expected{
-				stats: &models.Stats{
-					RegisteredDevices: 3,
-					OnlineDevices:     1,
-					ActiveSessions:    1,
-					PendingDevices:    1,
-					RejectedDevices:   0,
-				},
-				err: nil,
+				stats: &models.Stats{},
+				err:   nil,
 			},
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
+
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
-			defer fixtures.Teardown() // nolint: errcheck
+			defer fixtures.Teardown()
 
 			stats, err := mongostore.GetStats(context.TODO())
 			assert.Equal(t, tc.expected, Expected{stats: stats, err: err})

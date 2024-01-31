@@ -9,6 +9,7 @@ import (
 	"github.com/shellhub-io/shellhub/api/pkg/fixtures"
 	"github.com/shellhub-io/shellhub/pkg/cache"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestTagsGet(t *testing.T) {
@@ -36,11 +37,14 @@ func TestTagsGet(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	collection := mongostore.db.Collection("announcements")
 
 	// Due to the non-deterministic order of applying fixtures when dealing with multiple datasets,
 	// we ensure that both the expected and result arrays are correctly sorted.
@@ -54,6 +58,16 @@ func TestTagsGet(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			if tc.tenant != "" {
+				var testData []interface{}
+
+				testData = append(testData, tc.expected.len)
+
+				if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+					t.Fatalf("failed to insert documents: %v", err)
+				}
+			}
 
 			tags, count, err := mongostore.TagsGet(context.TODO(), tc.tenant)
 			sort(tc.expected.tags)
@@ -132,16 +146,27 @@ func TestTagsDelete(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
+
+	collection := mongostore.db.Collection("devices")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			var testData []interface{}
+			doc := bson.M{"tenant_id": tc.tenant, "tags": tc.tag}
+			testData = append(testData, doc)
+
+			if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+				t.Fatalf("failed to insert documents: %v", err)
+			}
 
 			count, err := mongostore.TagsDelete(context.TODO(), tc.tenant, tc.tag)
 			assert.Equal(t, tc.expected, Expected{count, err})

@@ -11,6 +11,7 @@ import (
 	"github.com/shellhub-io/shellhub/pkg/cache"
 	"github.com/shellhub-io/shellhub/pkg/models"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestPrivateKeyCreate(t *testing.T) {
@@ -32,11 +33,12 @@ func TestPrivateKeyCreate(t *testing.T) {
 		},
 	}
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	ctx := context.TODO()
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
@@ -63,7 +65,7 @@ func TestPrivateKeyGet(t *testing.T) {
 	}{
 		{
 			description: "fails when private key is not found",
-			fingerprint: "nonexistent",
+			fingerprint: "",
 			fixtures:    []string{fixtures.FixturePrivateKeys},
 			expected: Expected{
 				privKey: nil,
@@ -84,17 +86,33 @@ func TestPrivateKeyGet(t *testing.T) {
 			},
 		},
 	}
+	ctx := context.TODO()
+	client, host, stopContainer := dbtest.StartTestContainer(ctx)
+	defer stopContainer()
 
-	db := dbtest.DBServer{}
-	defer db.Stop()
+	mongostore := NewStore(client.Database("test"), cache.NewNullCache())
+	fixtures.Init(host, "test")
 
-	mongostore := NewStore(db.Client().Database("test"), cache.NewNullCache())
-	fixtures.Init(db.Host, "test")
+	collection := mongostore.db.Collection("private_keys")
 
 	for _, tc := range cases {
 		t.Run(tc.description, func(t *testing.T) {
 			assert.NoError(t, fixtures.Apply(tc.fixtures...))
 			defer fixtures.Teardown() // nolint: errcheck
+
+			var testData []interface{}
+			if tc.fingerprint != "" {
+				doc := bson.M{
+					"fingerprint": tc.fingerprint,
+					"data":        []byte("test"),
+					"created_at":  time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
+				}
+				testData = append(testData, doc)
+
+				if err := dbtest.InsertMockData(ctx, collection, testData); err != nil {
+					t.Fatalf("failed to insert documents: %v", err)
+				}
+			}
 
 			privKey, err := mongostore.PrivateKeyGet(context.TODO(), tc.fingerprint)
 			assert.Equal(t, tc.expected, Expected{privKey: privKey, err: err})
