@@ -1,6 +1,6 @@
 module github.com/shellhub-io/shellhub/tests
 
-go 1.21
+go 1.20
 
 require (
 	github.com/go-resty/resty/v2 v2.10.0
