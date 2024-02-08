@@ -12,14 +12,19 @@ import (
 )
 
 // getFreePort returns a randomly available TCP port.
-func getFreePort(t *testing.T) int {
+func getFreePort() string {
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
-	assert.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 
 	l, err := net.ListenTCP("tcp", addr)
-	assert.NoError(t, err)
+	if err != nil {
+		panic(err)
+	}
 	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port
+
+	return strconv.Itoa(l.Addr().(*net.TCPAddr).Port)
 }
 
 // loadEnv loads environment variables from the .env file and sets values for SHELLHUB_HTTP_PORT and SHELLHUB_SSH_PORT
@@ -28,8 +33,8 @@ func loadEnv(t *testing.T) map[string]string {
 	assert.NoError(t, err)
 
 	// Automatically assigns a random free port for HTTP and SSH services
-	env["SHELLHUB_HTTP_PORT"] = strconv.Itoa(getFreePort(t))
-	env["SHELLHUB_SSH_PORT"] = strconv.Itoa(getFreePort(t))
+	env["SHELLHUB_HTTP_PORT"] = getFreePort()
+	env["SHELLHUB_SSH_PORT"] = getFreePort()
 
 	return env
 }
