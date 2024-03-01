@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/shellhub-io/shellhub/pkg/models"
+	"github.com/shellhub-io/shellhub/tests/environment"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,152 +27,139 @@ func ReadToString(reader io.Reader, dst *string) error {
 	return nil
 }
 
-func TestDevSetup(t *testing.T) {
+func TestGettingStarted(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.TODO()
-
-	instance := NewDockerCompose()
-
-	type CommandResponse struct {
+	type ExpectedCommand struct {
 		msg  string
 		code int
 	}
 
 	type Expected struct {
-		userMsg string
-		nsMsg   string
+		userCmd      *ExpectedCommand
+		namespaceCmd *ExpectedCommand
 	}
 
 	cases := []struct {
 		description string
-		test        func(compose *DockerCompose) (*Expected, error)
+		test        func(context.Context, *environment.Environment) (*Expected, error)
 		expected    Expected
 	}{
 		{
 			description: "succeeds",
-			test: func(dockerCompose *DockerCompose) (*Expected, error) {
-				cli := dockerCompose.GetServiceCLI()
-				networks, err := cli.Networks(context.TODO())
-				if err != nil {
-					return nil, err
-				}
-				logrus.Info(networks)
+			test: func(ctx context.Context, env *environment.Environment) (*Expected, error) {
+				cli := env.GetService(environment.ServiceCLI)
 
 				// Try to create a new user
-				_, reader, err := cli.Exec(ctx, strings.Split("./cli user create john_doe secret john.doe@test.com", " "))
+				code, reader, err := cli.Exec(ctx, strings.Split("./cli user create john_doe secret john.doe@test.com", " "))
 				if err != nil {
 					return nil, err
 				}
 
-				var userRes string
-				if err := ReadToString(reader, &userRes); err != nil {
+				userCmd := &ExpectedCommand{
+					code: code,
+					msg:  "",
+				}
+
+				if err := ReadToString(reader, &userCmd.msg); err != nil {
 					return nil, err
 				}
-				logrus.Info(userRes)
+
+				logrus.Info(userCmd.msg)
 
 				// Try to create a new namespace
-				_, reader, err = cli.Exec(ctx, strings.Split("./cli namespace create dev john_doe 00000000-0000-4000-0000-000000000000", " "))
+				code, reader, err = cli.Exec(ctx, strings.Split("./cli namespace create dev john_doe 00000000-0000-4000-0000-000000000000", " "))
 				if err != nil {
 					return nil, err
 				}
 
-				var nsRes string
-				if err := ReadToString(reader, &nsRes); err != nil {
+				namespaceCmd := &ExpectedCommand{
+					code: code,
+					msg:  "",
+				}
+
+				if err := ReadToString(reader, &namespaceCmd.msg); err != nil {
 					return nil, err
 				}
-				logrus.Info(nsRes)
 
-				userAuth := new(models.UserAuthResponse)
-				res1, err := resty.
-					New().
-					R().
+				logrus.Info(namespaceCmd.msg)
+
+				auth := new(models.UserAuthResponse)
+				_, err = env.Request().
 					SetBody(map[string]string{
 						"username": "john_doe",
 						"password": "secret",
 					}).
-					SetResult(userAuth).
-					Post(fmt.Sprintf("http://localhost:%s/api/login", dockerCompose.GetEnv("SHELLHUB_HTTP_PORT")))
-				if err != nil {
-					return nil, err
-				}
-				logrus.Info(res1.Status())
-				logrus.Info(string(res1.Body()))
-
-				time.Sleep(60 * time.Second)
-
-				devicesList := make([]models.Device, 1)
-				res2, err := resty.
-					New().
-					R().
-					SetHeader("authorization", fmt.Sprintf("Bearer %s", userAuth.Token)).
-					SetResult(&devicesList).
-					Get(fmt.Sprintf("http://localhost:%s/api/devices", dockerCompose.GetEnv("SHELLHUB_HTTP_PORT")))
-				if err != nil {
-					return nil, err
-				}
-				for _, device := range devicesList {
-					logrus.Infof("%+v", device)
-				}
-				logrus.Info(res2.Status())
-				logrus.Info(string(res2.Body()))
-
-				_, err = resty.
-					New().
-					R().
-					SetHeader("authorization", fmt.Sprintf("Bearer %s", userAuth.Token)).
-					Patch(fmt.Sprintf("http://localhost:%s/api/devices/%s/accept", dockerCompose.GetEnv("SHELLHUB_HTTP_PORT"), devicesList[0].UID))
+					SetResult(auth).
+					Post("/api/login")
 				if err != nil {
 					return nil, err
 				}
 
-				time.Sleep(60 * time.Second)
+				devices := make([]models.Device, 1)
+				assert.EventuallyWithT(
+					t,
+					func(collect *assert.CollectT) {
+						res, err := env.Request().
+							SetHeader("authorization", "Bearer "+auth.Token).
+							SetResult(&devices).
+							Get("/api/devices?status=pending")
 
-				devicesList = make([]models.Device, 1)
-				_, err = resty.
-					New().
-					R().
-					SetHeader("authorization", fmt.Sprintf("Bearer %s", userAuth.Token)).
-					SetResult(&devicesList).
-					Get(fmt.Sprintf("http://localhost:%s/api/devices", dockerCompose.GetEnv("SHELLHUB_HTTP_PORT")))
+						assert.Equal(collect, 200, res.StatusCode())
+						assert.NoError(collect, err)
+						assert.Len(collect, devices, 1)
+					},
+					30*time.Second,
+					time.Second,
+				)
+
+				_, err = env.Request().
+					SetHeader("authorization", "Bearer "+auth.Token).
+					Patch(fmt.Sprintf("/api/devices/%s/accept", devices[0].UID))
 				if err != nil {
 					return nil, err
-				}
-				for _, device := range devicesList {
-					logrus.Infof("%+v", device)
 				}
 
 				return &Expected{
-					userMsg: userRes,
-					nsMsg:   nsRes,
+					userCmd:      userCmd,
+					namespaceCmd: namespaceCmd,
 				}, nil
 			},
 			expected: Expected{
-				// TODO: how can we assert the exit's code?
-				userMsg: "\nUsername: john_doe\nEmail: john.doe@test.com\n",
-				nsMsg:   "Namespace created successfully\nNamespace: dev\nTenant: 00000000-0000-4000-0000-000000000000\nOwner:", // TODO: how can we assert the Owner ID?
+				userCmd: &ExpectedCommand{
+					code: 0,
+					msg:  "\nUsername: john_doe\nEmail: john.doe@test.com\n",
+				},
+				namespaceCmd: &ExpectedCommand{
+					code: 0,
+					msg:  "Namespace created successfully\nNamespace: dev\nTenant: 00000000-0000-4000-0000-000000000000\nOwner:", // TODO: how can we assert the Owner ID?
+				},
 			},
 		},
 	}
 
-	for i, tt := range cases {
+	builder := environment.New(t)
+
+	for _, tt := range cases {
 		tc := tt
 
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			dockerCompose := instance.Clone().WithEnv("SHELLHUB_NETWORK", fmt.Sprintf("shellhub_network_%d", i+1))
+			ctx := context.Background()
 
-			teardown, err := dockerCompose.Start()
+			env, cleanup := builder.Clone(t).Start(ctx)
+			defer cleanup()
+
+			actual, err := tc.test(ctx, env)
 			if !assert.NoError(t, err) {
 				t.Fatal(err)
 			}
-			defer teardown() // nolint: errcheck
 
-			actual, err := tc.test(dockerCompose)
-			if assert.NoError(t, err) {
-				assert.Contains(t, actual.userMsg, tc.expected.userMsg)
-				assert.Contains(t, actual.nsMsg, tc.expected.nsMsg)
-			}
+			assert.Contains(t, actual.userCmd.msg, tc.expected.userCmd.msg)
+			assert.Equal(t, actual.userCmd.code, tc.expected.userCmd.code)
+
+			assert.Contains(t, actual.namespaceCmd.msg, tc.expected.namespaceCmd.msg)
+			assert.Equal(t, actual.namespaceCmd.code, tc.expected.namespaceCmd.code)
 		})
 	}
 }
