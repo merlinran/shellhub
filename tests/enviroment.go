@@ -25,7 +25,7 @@ type DockerCompose struct {
 func NewDockerCompose() *DockerCompose {
 	envs, _ := godotenv.Read("../.env")
 
-	envs["SHELLHUB_API_PORT"] = getFreePort()
+	// envs["SHELLHUB_API_PORT"] = getFreePort()
 	envs["SHELLHUB_HTTP_PORT"] = getFreePort()
 	envs["SHELLHUB_SSH_PORT"] = getFreePort()
 
@@ -57,7 +57,7 @@ func (e *DockerCompose) Clone() *DockerCompose {
 	}
 
 	// ensures that ports are always unique
-	clonedEnv.envs["SHELLHUB_API_PORT"] = getFreePort()
+	// clonedEnv.envs["SHELLHUB_API_PORT"] = getFreePort()
 	clonedEnv.envs["SHELLHUB_HTTP_PORT"] = getFreePort()
 	clonedEnv.envs["SHELLHUB_SSH_PORT"] = getFreePort()
 

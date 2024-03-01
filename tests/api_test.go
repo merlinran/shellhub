@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/shellhub-io/shellhub/pkg/models"
@@ -52,6 +53,11 @@ func TestDevSetup(t *testing.T) {
 			description: "succeeds",
 			test: func(dockerCompose *DockerCompose) (*Expected, error) {
 				cli := dockerCompose.GetServiceCLI()
+				networks, err := cli.Networks(context.TODO())
+				if err != nil {
+					return nil, err
+				}
+				logrus.Info(networks)
 
 				// Try to create a new user
 				_, reader, err := cli.Exec(ctx, strings.Split("./cli user create john_doe secret john.doe@test.com", " "))
@@ -63,6 +69,7 @@ func TestDevSetup(t *testing.T) {
 				if err := ReadToString(reader, &userRes); err != nil {
 					return nil, err
 				}
+				logrus.Info(userRes)
 
 				// Try to create a new namespace
 				_, reader, err = cli.Exec(ctx, strings.Split("./cli namespace create dev john_doe 00000000-0000-4000-0000-000000000000", " "))
@@ -74,9 +81,10 @@ func TestDevSetup(t *testing.T) {
 				if err := ReadToString(reader, &nsRes); err != nil {
 					return nil, err
 				}
+				logrus.Info(nsRes)
 
 				userAuth := new(models.UserAuthResponse)
-				_, err = resty.
+				res1, err := resty.
 					New().
 					R().
 					SetBody(map[string]string{
@@ -88,9 +96,13 @@ func TestDevSetup(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
+				logrus.Info(res1.Status())
+				logrus.Info(string(res1.Body()))
+
+				time.Sleep(60 * time.Second)
 
 				devicesList := make([]models.Device, 1)
-				res, err := resty.
+				res2, err := resty.
 					New().
 					R().
 					SetHeader("authorization", fmt.Sprintf("Bearer %s", userAuth.Token)).
@@ -102,8 +114,8 @@ func TestDevSetup(t *testing.T) {
 				for _, device := range devicesList {
 					logrus.Infof("%+v", device)
 				}
-
-				logrus.Info("body: ", string(res.Body()))
+				logrus.Info(res2.Status())
+				logrus.Info(string(res2.Body()))
 
 				_, err = resty.
 					New().
@@ -113,6 +125,8 @@ func TestDevSetup(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
+
+				time.Sleep(60 * time.Second)
 
 				devicesList = make([]models.Device, 1)
 				_, err = resty.
@@ -141,12 +155,12 @@ func TestDevSetup(t *testing.T) {
 		},
 	}
 
-	for _, tt := range cases {
+	for i, tt := range cases {
 		tc := tt
 
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
-			dockerCompose := instance.Clone()
+			dockerCompose := instance.Clone().WithEnv("SHELLHUB_NETWORK", fmt.Sprintf("shellhub_network_%d", i+1))
 
 			teardown, err := dockerCompose.Start()
 			if !assert.NoError(t, err) {
