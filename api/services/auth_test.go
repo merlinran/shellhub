@@ -181,11 +181,18 @@ func TestAuthUser(t *testing.T) {
 						Email:    "john.doe@test.com",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
-				mock.On("UserGetByUsername", ctx, "john_doe").Return(user, nil).Once()
+				mock.
+					On("UserGetByUsername", ctx, "john_doe").
+					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "wrong_password", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(false).
+					Once()
 			},
 			expected: Expected{
 				res: nil,
@@ -208,13 +215,17 @@ func TestAuthUser(t *testing.T) {
 						Email:    "john.doe@test.com",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
 				mock.
 					On("UserGetByUsername", ctx, "john_doe").
 					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "secret", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(true).
 					Once()
 				mock.
 					On("GetStatusMFA", ctx, "65fdd16b5f62f93184ec8a39").
@@ -242,13 +253,17 @@ func TestAuthUser(t *testing.T) {
 						Email:    "john.doe@test.com",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
 				mock.
 					On("UserGetByUsername", ctx, "john_doe").
 					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "secret", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(true).
 					Once()
 				mock.
 					On("GetStatusMFA", ctx, "65fdd16b5f62f93184ec8a39").
@@ -279,7 +294,7 @@ func TestAuthUser(t *testing.T) {
 						Email:    "john.doe@test.com",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}, errors.New("error", "", 0)),
 			},
@@ -301,13 +316,17 @@ func TestAuthUser(t *testing.T) {
 						Name:     "john doe",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
 				mock.
 					On("UserGetByUsername", ctx, "john_doe").
 					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "secret", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(true).
 					Once()
 				mock.
 					On("GetStatusMFA", ctx, "65fdd16b5f62f93184ec8a39").
@@ -361,13 +380,17 @@ func TestAuthUser(t *testing.T) {
 						Name:     "john doe",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
 				mock.
 					On("UserGetByUsername", ctx, "john_doe").
 					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "secret", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(true).
 					Once()
 				mock.
 					On("GetStatusMFA", ctx, "65fdd16b5f62f93184ec8a39").
@@ -421,13 +444,17 @@ func TestAuthUser(t *testing.T) {
 						Name:     "john doe",
 					},
 					Password: models.UserPassword{
-						Hash: "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b",
+						Hash: "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi",
 					},
 				}
 
 				mock.
 					On("UserGetByUsername", ctx, "john_doe").
 					Return(user, nil).
+					Once()
+				passwordMock.
+					On("Compare", "secret", "$2a$10$V/6N1wsjheBVvWosPfv02uf4WAOb9lmp8YWQCIa2UYuFV4OJby7Yi").
+					Return(true).
 					Once()
 				mock.
 					On("GetStatusMFA", ctx, "65fdd16b5f62f93184ec8a39").

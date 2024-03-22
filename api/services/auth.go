@@ -155,7 +155,7 @@ func (s *service) AuthUser(ctx context.Context, req *requests.UserAuth) (*models
 		return nil, NewErrUserNotConfirmed(nil)
 	}
 
-	if !user.Password.Compare(models.HashUserPassword(req.Password)) {
+	if !user.Password.Compare(req.Password) {
 		return nil, NewErrAuthUnathorized(nil)
 	}
 
