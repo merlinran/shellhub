@@ -590,7 +590,8 @@ func TestAuthUser(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			tc.requiredMocks()
 
-			res, err := service.AuthUser(ctx, tc.req)
+			// TODO: how can we mock the cache and test timout?
+			res, _, err := service.AuthUser(ctx, tc.req, "")
 			// Since the resulting token is not crucial for the assertion and
 			// difficult to mock, it is safe to ignore this field.
 			if res != nil {

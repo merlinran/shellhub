@@ -16,6 +16,7 @@ import (
 	client "github.com/shellhub-io/shellhub/pkg/api/internalclient"
 	"github.com/shellhub-io/shellhub/pkg/api/requests"
 	"github.com/shellhub-io/shellhub/pkg/models"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -212,7 +213,18 @@ func (h *Handler) AuthUser(c gateway.Context) error {
 		return err
 	}
 
-	res, err := h.service.AuthUser(c.Ctx(), req)
+	log.Info(c.RealIP())
+	log.Info(c.RealIP())
+	log.Info(c.RealIP())
+	log.Info(c.RealIP())
+
+	res, timeout, err := h.service.AuthUser(c.Ctx(), req, c.RealIP())
+	c.Response().Header().Set("X-Timeout", strconv.FormatInt(timeout, 10))
+
+	if timeout > 0 {
+		return c.NoContent(http.StatusTooManyRequests)
+	}
+
 	if err != nil {
 		switch {
 		case errors.Is(err, svc.ErrUserNotFound):

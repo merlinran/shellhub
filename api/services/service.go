@@ -5,8 +5,10 @@ import (
 
 	"github.com/shellhub-io/shellhub/api/store"
 	"github.com/shellhub-io/shellhub/pkg/cache"
+	"github.com/shellhub-io/shellhub/pkg/envs"
 	"github.com/shellhub-io/shellhub/pkg/geoip"
 	"github.com/shellhub-io/shellhub/pkg/validator"
+	log "github.com/sirupsen/logrus"
 )
 
 type APIService struct {
@@ -23,6 +25,13 @@ type service struct {
 	client    interface{}
 	locator   geoip.Locator
 	validator *validator.Validator
+	cfg       *config
+}
+
+type config struct {
+	// Specifies the maximum duration in minutes for which a user can be blocked from login attempts.
+	// The default value is 32768, equivalent to 15 days.
+	MaximumLoginTimeout int `env:"MAXIMUM_LOGIN_TIMEOUT,default=0"`
 }
 
 //go:generate mockery --name Service --filename services.go
@@ -52,5 +61,19 @@ func NewService(store store.Store, privKey *rsa.PrivateKey, pubKey *rsa.PublicKe
 		}
 	}
 
-	return &APIService{service: &service{store, privKey, pubKey, cache, c, l, validator.New()}}
+	cfg, err := envs.ParseWithPrefix[config]("API_")
+	if err != nil {
+		log.WithError(err).Fatal("Failed to load environment variables")
+	}
+
+	return &APIService{service: &service{
+		client:    c,
+		locator:   l,
+		store:     store,
+		privKey:   privKey,
+		pubKey:    pubKey,
+		cache:     cache,
+		validator: validator.New(),
+		cfg:       cfg,
+	}}
 }
