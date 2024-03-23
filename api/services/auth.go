@@ -207,6 +207,13 @@ func (s *service) AuthUser(ctx context.Context, req *requests.UserAuth) (*models
 			Warn("unable to cache the authentication token")
 	}
 
+	// Updates the hash algorithm to bcrypt if still using SHA256
+	if !strings.HasPrefix(user.Password.Hash, "$") {
+		if neo, _ := models.HashUserPassword(req.Password); neo.Hash != "" {
+			s.store.UserUpdatePassword(ctx, neo.Hash, user.ID) // nolint: errcheck
+		}
+	}
+
 	return &models.UserAuthResponse{
 		Token:  token.String(),
 		Name:   user.Name,
