@@ -102,6 +102,13 @@ func newSession(conn *Conn, creds *Credentials, dim Dimensions, info Info) error
 	user := fmt.Sprintf("%s@%s", creds.Username, creds.Device)
 	auth, err := getAuth(creds, magickey.GetRerefence())
 	if err != nil {
+		log.WithFields(log.Fields{
+			"user":   creds.Username,
+			"device": creds.Device,
+			"cols":   dim.Cols,
+			"rows":   dim.Rows,
+		}).WithError(err).Error("Auth error")
+
 		return ErrGetAuth
 	}
 
